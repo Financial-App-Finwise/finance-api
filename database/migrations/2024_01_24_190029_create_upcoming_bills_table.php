@@ -11,13 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('transactions', function (Blueprint $table) {
+        Schema::create('upcoming_bills', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('userID');
             $table->unsignedBigInteger('categoryID');
             $table->decimal('amount', 10, 2)->default(0);
             $table->date('date');
-            $table->text('note');
+            $table->string('name')->nullable();
+            $table->text('note')->nullable();
             $table->timestamps();
 
             // Foreign key constraints
@@ -31,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('transactions');
+        Schema::dropIfExists('upcoming_bills');
     }
 };

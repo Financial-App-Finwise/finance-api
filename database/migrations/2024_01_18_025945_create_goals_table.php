@@ -15,13 +15,14 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('userID');
             $table->string('name');
-            $table->float('amount');
+            $table->decimal('amount', 10, 2); 
             $table->float('currentSave')->nullable();
             $table->float('remainingSave')->nullable();
-            $table->string('type', 50);
-            $table->date('date');
+            $table->boolean('setDates')->default(true); // New field to store user's choice
+            $table->date('start_date')->nullable();
+            $table->date('end_date')->nullable();
             $table->timestamps();
-
+        
             // Foreign key constraint
             $table->foreign('userID')->references('id')->on('users');
         });

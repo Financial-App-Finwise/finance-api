@@ -11,18 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('upcoming_bills', function (Blueprint $table) {
+        Schema::create('parent_categories', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('userID');
-            $table->unsignedBigInteger('categoryID');
-            $table->decimal('amount', 10, 2)->default(0);
-            $table->date('date');
-            $table->text('note');
+            $table->string('name', 50);
+            $table->string('type', 10)->default('expense'); 
             $table->timestamps();
-
-            // Foreign key constraints
+             // Foreign key constraints
             $table->foreign('userID')->references('id')->on('users');
-            $table->foreign('categoryID')->references('id')->on('categories');
         });
     }
 
@@ -31,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('upcoming_bills');
+        Schema::dropIfExists('parent_categories');
     }
 };
