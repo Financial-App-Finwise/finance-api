@@ -21,12 +21,16 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 
-Route::post('/auth/register', [AuthController::class, 'register']);
-Route::post('/auth/login', [AuthController::class, 'login']);
-Route::post('/auth/verify-email', [AuthController::class, 'verifyEmail']);
+// Authentication routes
+Route::group(['prefix' => 'auth'], function () {
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/verify-email', [AuthController::class, 'verifyEmail']);
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+});
 
-Route::get('/auth/test', [AuthController::class, 'test']);
 
+// Reject any random requests
 Route::any('{any}', function () {
     return response()->json(
         [

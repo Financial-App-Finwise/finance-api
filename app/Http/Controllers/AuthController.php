@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\ApiSession;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -15,7 +16,6 @@ use Illuminate\Support\Str;
 class AuthController extends Controller
 {
     //
-
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -30,12 +30,11 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['result' => 'fail', 'code' => 1, 'message' => implode(", ", $validator->errors()->all())])->setStatusCode(422);
+            return response()->json(['success' => 'false', 'code' => 1, 'message' => implode(", ", $validator->errors()->all())])->setStatusCode(422);
         }
 
-
         // User verification
-        $code = Str::random(40);
+        $code = Str::random(6);
 
         $user = User::create(array_merge(
             $validator->validated(),
@@ -56,12 +55,12 @@ class AuthController extends Controller
                 $message->to($data['email'])->subject($data['title']);
             });
         } catch (Exception $e) {
-            return response()->json(['status' => 'fail', 'message' => $e->getMessage()]);
+            return response()->json(['success' => 'false', 'message' => $e->getMessage()]);
         }
 
         return response()->json([
-            'message' => 'User successfully registered',
-            'user' => $user
+            "success" => "true",
+            'message' => 'User successfully registered'
         ], 201);
     }
 
@@ -77,7 +76,7 @@ class AuthController extends Controller
                     ->first();
 
         if (!$user) {
-            return response()->json(['message' => 'Invalid email or code'], 400);
+            return response()->json(['success' => 'false', 'message' => 'Invalid email or code'], 400);
         }
 
         // Mark the user's email as verified
@@ -85,14 +84,7 @@ class AuthController extends Controller
         $user->email_verification_code = null;
         $user->save();
 
-        return response()->json(['message' => 'Email successfully verified'], 200);
-    }
-
-    public function test(Request $request)
-    {
-        return response()->json([
-            'message' => 'User successfully registered',
-        ], 201);
+        return response()->json(['success' => 'true', 'message' => 'Email successfully verified'], 200);
     }
 
     public function login(Request $request)
@@ -110,26 +102,38 @@ class AuthController extends Controller
         $password = $request->password;
 
         if ($validator->fails())
-            return response()->json(['result' => 'fail', 'code' => 1, 'message' => implode(", ", $validator->errors()->all())])->setStatusCode(422);
+            return response()->json(['success' => 'false', 'code' => 1, 'message' => implode(", ", $validator->errors()->all())])->setStatusCode(422);
 
 
         if (!$token = auth('api')->attempt([$cred_key => $email, 'password' => $password])) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+            return response()->json(['success' => 'false', 'message' => 'Unauthorized'], 401);
         }
         $user = auth('api')->user();
 
-        return $this->createNewToken($token);
-    }
+        $session = ApiSession::firstOrNew([
+            'device_type' => $request->device_type
+        ]);
 
+        $session->user_id = $user->id;
+        $session->api_token = $token;
+        $session->save();
 
-    protected function createNewToken($token)
-    {
         return response()->json([
-            'access_token' => $token,
+            'success' => 'true',
+            'api_token' => $token,
             'token_type' => 'bearer',
-            'user' => auth('api')->user()
+            'data' => auth('api')->user()
         ]);
     }
+    
+    public function logout(Request $request)
+    {
+        $token = $request->bearerToken();
+        auth()->logout();
 
+        ApiSession::where('api_token', $token)->delete();
+
+        return response()->json(['success' => 'true', 'message' => 'User successfully signed out']);
+    }
 
 }
