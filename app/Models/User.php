@@ -24,6 +24,10 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
         'email',
         'password',
         'email_verification_code',
+        'email_verified_at',
+        'totalBalance',
+        'created_at',
+        'updated_at',
     ];
 
     /**
@@ -45,6 +49,7 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+    
 
 public function getJWTIdentifier()
 {
@@ -55,27 +60,51 @@ public function getJWTCustomClaims()
 {
     return [];
 }
-}
-
-class User extends Model
+public function parentcategories()
 {
-    use HasFactory;
-
-    public function parentcategories(){
-        //return $this->hasMany(Category::class);
-        return $this->hasMany(ParentCategory::class, 'userID');
-    }
-    public function categories(){
-        //return $this->hasMany(Category::class);
-        return $this->hasMany(Category::class, 'userID');
-    }
-    public function goals(){
-        return $this->hasMany(Goal::class);
-    }
-    public function upcomingbills(){
-        return $this->hasMany(UpcomingBill::class);
-    }
-    public function transactions(){
-        return $this->hasMany(Transaction::class);
-    }
+    return $this->hasMany(ParentCategory::class, 'userID');
 }
+
+public function categories()
+{
+    return $this->hasMany(Category::class, 'userID');
+}
+
+public function goals()
+{
+    return $this->hasMany(Goal::class);
+}
+
+public function upcomingbills()
+{
+    return $this->hasMany(UpcomingBill::class);
+}
+
+public function transactions()
+{
+    return $this->hasMany(Transaction::class);
+}
+}
+
+// class User extends Model
+// {
+//     use HasFactory;
+
+//     public function parentcategories(){
+//         //return $this->hasMany(Category::class);
+//         return $this->hasMany(ParentCategory::class, 'userID');
+//     }
+//     public function categories(){
+//         //return $this->hasMany(Category::class);
+//         return $this->hasMany(Category::class, 'userID');
+//     }
+//     public function goals(){
+//         return $this->hasMany(Goal::class);
+//     }
+//     public function upcomingbills(){
+//         return $this->hasMany(UpcomingBill::class);
+//     }
+//     public function transactions(){
+//         return $this->hasMany(Transaction::class);
+//     }
+// }
