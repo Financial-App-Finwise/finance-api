@@ -18,7 +18,6 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('email_verification_code')->nullable();
             $table->string('password');
-            $table->decimal('totalBalance', 10, 2)->default(0);
             $table->rememberToken();
             $table->timestamps();
             

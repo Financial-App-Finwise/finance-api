@@ -11,14 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('parent_categories', function (Blueprint $table) {
+        Schema::create('transaction_goals', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('userID');
-            $table->string('name', 50);
-            $table->string('type', 10)->default('expense'); 
+            $table->unsignedBigInteger('transactionID');
+            $table->unsignedBigInteger('goalID');
+            $table->decimal('ContributionAmount', 10, 2);
             $table->timestamps();
-             // Foreign key constraints
+
+            // Foreign key constraints
             $table->foreign('userID')->references('id')->on('users');
+            $table->foreign('transactionID')->references('id')->on('transactions');
+            $table->foreign('goalID')->references('id')->on('goals');
         });
     }
 
@@ -27,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('parent_categories');
+        Schema::dropIfExists('transaction_goals');
     }
 };

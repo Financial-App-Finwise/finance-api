@@ -14,21 +14,22 @@ return new class extends Migration
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('userID');
-            $table->unsignedBigInteger('parentID');
-            $table->unsignedBigInteger('categoryID');
-            $table->unsignedBigInteger('goalID')->nullable();
+            $table->unsignedBigInteger('categoryID')->nullable();
+            $table->tinyInteger('isIncome')->default(0); // Default type to 0 for expense and 1 for income
             $table->decimal('amount', 10, 2)->default(0);
-            $table->decimal('contributionAmount', 10, 2)->nullable(); 
+            $table->tinyInteger('hasContributed')->default(0); // Default to 0 for has contributed to goal and 1 for hasn't.
+            $table->unsignedBigInteger('upcomingbillID')->nullable();
+            $table->unsignedBigInteger('budgetplanID')->nullable();
+            $table->enum('expenseType', ['General', 'Upcoming Bill', 'Budget Plan'])->default('General');
             $table->date('date');
             $table->text('note')->nullable();
-            $table->string('type', 10)->default('expense'); // Default option type to 'expense'
             $table->timestamps();
 
             // Foreign key constraints
-            //$table->foreign('userID')->references('id')->on('users');
-            $table->foreign('parentID')->references('id')->on('parent_categories')->onDelete('cascade');
+            $table->foreign('userID')->references('id')->on('users');
             $table->foreign('categoryID')->references('id')->on('categories');
-            $table->foreign('goalID')->references('id')->on('goals');
+            $table->foreign('upcomingbillID')->references('id')->on('upcoming_bills');
+            $table->foreign('budgetplanID')->references('id')->on('budget_plans');
         });
     }
 

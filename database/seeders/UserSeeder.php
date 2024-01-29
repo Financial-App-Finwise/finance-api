@@ -20,19 +20,18 @@ class UserSeeder extends Seeder
         // ->create();
 
 
-        // DB::table('users')->insert([
-        //     'name' => 'admin',
-        //     'email' => 'admin@example.com',
-        //     'password' => Hash::make('password'),
-        //     'totalBalance' => 0,
-        //     'created_at' => now(),
-        //     'updated_at' => now(),
-        // ]);
+        DB::table('users')->insert([
+            'name' => 'admin',
+            'email' => 'admin@example.com',
+            'password' => Hash::make('password'),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
-        User::factory()
-        ->count(2)
-        ->hasUpcomingBills(2)
-        ->create();
+        // User::factory()
+        // ->count(2)
+        // ->hasUpcomingBills(2)
+        // ->create();
 
     }
 }

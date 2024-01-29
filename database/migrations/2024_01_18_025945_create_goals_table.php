@@ -14,13 +14,14 @@ return new class extends Migration
         Schema::create('goals', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('userID');
-            $table->string('name');
+            $table->string('name', 50);
             $table->decimal('amount', 10, 2); 
-            $table->float('currentSave')->nullable();
-            $table->float('remainingSave')->nullable();
-            $table->boolean('setDates')->default(true); // New field to store user's choice
-            $table->date('start_date')->nullable();
-            $table->date('end_date')->nullable();
+            $table->decimal('currentSave', 10, 2)->nullable();
+            $table->decimal('remainingSave', 10, 2)->nullable();
+            $table->boolean('setDate')->default(true); // New field to store user's choice
+            $table->date('startDate')->nullable();
+            $table->date('endDate')->nullable();
+            $table->decimal('montlyContribution', 10, 2)->nullable();
             $table->timestamps();
         
             // Foreign key constraint

@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('upcoming_bills', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('userID');
-            $table->unsignedBigInteger('categoryID');
+            $table->unsignedBigInteger('categoryID')->nullable();
             $table->decimal('amount', 10, 2)->default(0);
             $table->date('date');
-            $table->string('name')->nullable();
+            $table->string('name', 50)->nullable();
             $table->text('note')->nullable();
             $table->timestamps();
 
