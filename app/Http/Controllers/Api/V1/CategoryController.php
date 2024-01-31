@@ -55,10 +55,19 @@ class CategoryController extends Controller
      */
     public function store(StoreCategoryRequest $request)
     {
-        // Logic to create a new user
         return new CategoryResource(Category::create($request->all()));
-        return response()->json(['message' => 'Category created successfully']);
     }
+    // public function store(StoreCategoryRequest $request)
+    // {
+    //     $categoryData = $request->validated();
+    
+    //     // Explicitly set userID based on authenticated user or any other logic
+    //     $categoryData['userID'] = auth()->id(); // Assuming you are using Laravel's authentication
+    
+    //     $category = Category::create($categoryData);
+    
+    //     return new CategoryResource($category);
+    // }
     /**
      * Display the specified resource.
      */
@@ -85,7 +94,7 @@ class CategoryController extends Controller
     public function update(UpdateCategoryRequest $request, Category $category)
     {
         // Logic to update a category by ID
-        $user->update($request->all());
+        $category->update($request->all());
         return response()->json(['message' => 'Category updated successfully']);
     }
     /**
@@ -93,7 +102,12 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category)
     {
-        // Logic to delete a user by ID
+        // Check if the authenticated user is the owner of the category
+        if ($user->id !== $category->userID) {
+        return response()->json(['error' => 'Unauthorized'], 403);
+        }
+        // Logic to delete a category by ID
+        $category->delete();
         return response()->json(['message' => 'Category deleted successfully']);
     }
 }

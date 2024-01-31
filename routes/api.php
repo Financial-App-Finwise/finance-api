@@ -68,6 +68,9 @@ Route::post('/users', [Api\V1\UserController::class, 'store']);
 // Route to update a user by ID
 Route::put('/users/{user}', [Api\V1\UserController::class, 'update']);
 Route::patch('/users/{user}', [Api\V1\UserController::class, 'update']);
+// Route to delete a user by ID
+Route::delete('/users/{user}', [Api\V1\UserController::class, 'destroy']);
+
 
 // Route to get all categories
 Route::get('/categories', [Api\V1\CategoryController::class, 'index']);
@@ -78,6 +81,8 @@ Route::post('/categories', [Api\V1\CategoryController::class, 'store']);
 // Route to update a category by ID
 Route::put('/categories/{category}', [Api\V1\CategoryController::class, 'update']);
 Route::patch('/categories/{category}', [Api\V1\CategoryController::class, 'update']);
+// Route to delete a category by ID
+Route::delete('/categories/{category}', [Api\V1\CategoryController::class, 'destroy']);
 
 // Route to get all upcomingbills
 Route::get('/upcomingbills', [Api\V1\UpcomingbillController::class, 'index']);

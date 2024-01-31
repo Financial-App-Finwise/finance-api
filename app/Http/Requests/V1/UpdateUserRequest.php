@@ -24,22 +24,31 @@ class UpdateUserRequest extends FormRequest
     {
         $method = $this->method();
         if ($method == 'PUT') {
+            // return [
+            // 'name' => 'sometimes|required',
+            // 'email' => 'sometimes|required|email',
+            // 'email_verified_at' => 'sometimes|required',
+            // //'totalBalance' => 'sometimes|required|numeric',
+            // 'created_at' => 'sometimes|required',
+            // 'updated_at' => 'sometimes|required',
+            // ];
             return [
-            'name' => 'sometimes|required',
-            'email' => 'sometimes|required|email',
-            'email_verified_at' => 'sometimes|required',
-            //'totalBalance' => 'sometimes|required|numeric',
-            'created_at' => 'sometimes|required',
-            'updated_at' => 'sometimes|required',
-            ];
+                'name' => 'sometimes|required|string|max:50',
+                'email' => 'sometimes|required|email|unique:users,email',
+                //'password' => 'required|string|min:8',
+            ];  
         } else {
             return [
-                'name' => 'sometimes|required',
-                'email' => 'sometimes|required|email',
-                'email_verified_at' => 'sometimes|required',
-                //'totalBalance' => 'sometimes|required',
-                'created_at' => 'sometimes|required',
-                'updated_at' => 'sometimes|required',
+                'name' => 'sometimes|required|string|max:50',
+                'email' => 'sometimes|required|email|unique:users,email',
+                //'password' => 'sometimes|required|string|min:8',
+                // 'name' => 'sometimes|required',
+                // 'email' => 'sometimes|required|email',
+                // 'email_verified_at' => 'sometimes|required',
+                // //'totalBalance' => 'sometimes|required',
+                // 'created_at' => 'sometimes|required',
+                // 'updated_at' => 'sometimes|required',
+                // 'password' => ['sometimes|required'],
             ];
         }
         

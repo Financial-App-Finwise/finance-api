@@ -12,7 +12,7 @@ class UpdateCategoryRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -25,23 +25,21 @@ class UpdateCategoryRequest extends FormRequest
         $method = $this->method();
         if ($method == 'PUT') {
             return [
-                'name' => 'sometimes|required',
-                'isIncome' => 'sometimes|required',
-                'parentID' => 'sometimes|required',
-                'level' => 'sometimes|required',
-                'isOnboarding' => 'sometimes|required',
-                'created_at' => 'sometimes|required',
-                'updated_at' => 'sometimes|required',
+                //'userID' => 'required|exists:users,id',
+                'name' => 'required',
+                'isIncome' => 'required',
+                'parentID' => 'required',
+                'level' => 'required',
+                'isOnboarding' => 'required',
             ];
         } else {
             return [
-                'name' => 'sometimes|required',
-                'isIncome' => 'sometimes|required',
-                'parentID' => 'sometimes|required',
-                'level' => 'sometimes|required',
-                'isOnboarding' => 'sometimes|required',
-                'created_at' => 'sometimes|required',
-                'updated_at' => 'sometimes|required',
+                //'userID' => 'required|exists:users,id',
+                'name' => 'required',
+                'isIncome' => 'required',
+                'parentID' => 'required',
+                'level' => 'required',
+                'isOnboarding' => 'required',
             ];
         }
     }

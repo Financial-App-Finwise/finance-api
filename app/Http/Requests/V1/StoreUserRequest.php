@@ -12,7 +12,7 @@ class StoreUserRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,13 +22,19 @@ class StoreUserRequest extends FormRequest
      */
     public function rules(): array
     {
+        // return [
+        //     'name' => ['required|string|max:50'],
+        //     'email' => ['required|email|unique:users,email'],
+        //     'email_verified_at' => ['sometimes|required'],
+        //     //'totalBalance' => 'sometimes|required|numeric',
+        //     'created_at' => ['sometimes|required'],
+        //     'updated_at' => ['sometimes|required'],
+        //     'password' => ['required'],
+        // ];
         return [
-            'name' => 'sometimes|required',
-            'email' => 'sometimes|required|email',
-            'email_verified_at' => 'sometimes|required',
-            //'totalBalance' => 'sometimes|required|numeric',
-            'created_at' => 'sometimes|required',
-            'updated_at' => 'sometimes|required',
-        ];
+            'name' => 'required|string|max:50',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:8',
+        ];  
     }
 }

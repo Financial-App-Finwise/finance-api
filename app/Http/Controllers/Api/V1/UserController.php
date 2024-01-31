@@ -40,13 +40,13 @@ class UserController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
-    {
-        // Logic to get a specific user by ID
-         $user = User::find($id);
-         return response()->json($user);
-        //return $user = User::find($id);
-    }
+    // public function create()
+    // {
+    //     // Logic to get a specific user by ID
+    //      $user = User::find($id);
+    //      return response()->json($user);
+    //     //return $user = User::find($id);
+    // }
 
     /**
      * Store a newly created resource in storage.
@@ -69,10 +69,10 @@ class UserController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(User $user)
-    {
-        //
-    }
+    // public function edit(User $user)
+    // {
+    //     //
+    // }
 
     /**
      * Update the specified resource in storage.
@@ -89,6 +89,19 @@ class UserController extends Controller
     public function destroy(User $user)
     {
         // Logic to delete a user by ID
+        $user->delete();
         return response()->json(['message' => 'User deleted successfully']);
     }
+    // public function destroy($id){
+    //     $user=User::find($id);
+    
+    //     $user->destroy();
+    
+    //     $data=[
+    //         'status' => 200,
+    //         'message' => "data deleted successfully"
+    //     ];
+    
+    //     return response()->json($data, 200);
+    // }
 }
