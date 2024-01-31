@@ -5,7 +5,8 @@ namespace App\Http\Requests\V1;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class StoreUserRequest extends FormRequest
+
+class StoreCategoryRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,9 +25,10 @@ class StoreUserRequest extends FormRequest
     {
         return [
             'name' => 'sometimes|required',
-            'email' => 'sometimes|required|email',
-            'email_verified_at' => 'sometimes|required',
-            //'totalBalance' => 'sometimes|required|numeric',
+            'isIncome' => 'sometimes|required',
+            'parentID' => 'sometimes|required',
+            'level' => 'sometimes|required',
+            'isOnboarding' => 'sometimes|required',
             'created_at' => 'sometimes|required',
             'updated_at' => 'sometimes|required',
         ];

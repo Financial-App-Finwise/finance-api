@@ -3,16 +3,15 @@
 namespace App\Http\Requests\V1;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
-class UpdateUserRequest extends FormRequest
+class UpdateUpcomingbillRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return true;
+        return false;
     }
 
     /**
@@ -25,23 +24,24 @@ class UpdateUserRequest extends FormRequest
         $method = $this->method();
         if ($method == 'PUT') {
             return [
-            'name' => 'sometimes|required',
-            'email' => 'sometimes|required|email',
-            'email_verified_at' => 'sometimes|required',
-            //'totalBalance' => 'sometimes|required|numeric',
-            'created_at' => 'sometimes|required',
-            'updated_at' => 'sometimes|required',
+                'categoryID' => 'sometimes|required',
+                'amount' => 'sometimes|required',
+                'date' => 'sometimes|required|dateTime',
+                'name' => 'sometimes|required',
+                'note' => 'sometimes|required',
+                'created_at' => 'sometimes|required',
+                'updated_at' => 'sometimes|required',
             ];
         } else {
             return [
+                'categoryID' => 'sometimes|required',
+                'amount' => 'sometimes|required',
+                'date' => 'sometimes|required|dateTime',
                 'name' => 'sometimes|required',
-                'email' => 'sometimes|required|email',
-                'email_verified_at' => 'sometimes|required',
-                //'totalBalance' => 'sometimes|required',
+                'note' => 'sometimes|required',
                 'created_at' => 'sometimes|required',
                 'updated_at' => 'sometimes|required',
             ];
         }
-        
     }
 }

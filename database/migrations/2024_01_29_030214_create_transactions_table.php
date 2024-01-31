@@ -14,14 +14,14 @@ return new class extends Migration
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('userID');
-            $table->unsignedBigInteger('categoryID')->nullable();
+            $table->unsignedBigInteger('categoryID');
             $table->tinyInteger('isIncome')->default(0); // Default type to 0 for expense and 1 for income
             $table->decimal('amount', 10, 2)->default(0);
             $table->tinyInteger('hasContributed')->default(0); // Default to 0 for has contributed to goal and 1 for hasn't.
             $table->unsignedBigInteger('upcomingbillID')->nullable();
             $table->unsignedBigInteger('budgetplanID')->nullable();
             $table->enum('expenseType', ['General', 'Upcoming Bill', 'Budget Plan'])->default('General');
-            $table->date('date');
+            $table->dateTime('date');
             $table->text('note')->nullable();
             $table->timestamps();
 

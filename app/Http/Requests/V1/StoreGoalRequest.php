@@ -5,7 +5,8 @@ namespace App\Http\Requests\V1;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class StoreUserRequest extends FormRequest
+
+class StoreGoalRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,13 +23,17 @@ class StoreUserRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        return[
             'name' => 'sometimes|required',
-            'email' => 'sometimes|required|email',
-            'email_verified_at' => 'sometimes|required',
-            //'totalBalance' => 'sometimes|required|numeric',
+            'amount' => 'sometimes|required',
+            'currentSave' => 'sometimes|required',
+            'remainingSave' => 'sometimes|required',
+            'setDate' => 'sometimes|required',
+            'startDate' => 'sometimes|required',
+            'endDate' => 'sometimes|required',
+            'monthlyContribution' => 'sometimes|required',
             'created_at' => 'sometimes|required',
             'updated_at' => 'sometimes|required',
-        ];
+            ];
     }
 }

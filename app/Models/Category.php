@@ -9,9 +9,15 @@ class Category extends Model
 {
     use HasFactory;
 
-    // public function user(){
-    //     return $this->belongsTo(User::class);
-    // }
+    protected $fillable = [
+        'name',
+        'isIncome',
+        'parentID',
+        'level',
+        'isOnbaording',
+        'created_at',
+        'updated_at',
+    ];
     public function user()
     {
         return $this->belongsTo(User::class, 'userID');

@@ -21,7 +21,7 @@ return new class extends Migration
             $table->boolean('setDate')->default(true); // New field to store user's choice
             $table->date('startDate')->nullable();
             $table->date('endDate')->nullable();
-            $table->decimal('montlyContribution', 10, 2)->nullable();
+            $table->decimal('monthlyContribution', 10, 2);
             $table->timestamps();
         
             // Foreign key constraint

@@ -21,11 +21,12 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UserSeeder::class
         ]);
-        // $this->call([
-        //     ParentCategorySeeder::class
-        // ]);
-        // $this->call([
-        //     CategorySeeder::class
-        // ]);
+
+        $this->call([
+            CategorySeeder::class
+        ]);
+        $this->call([
+            UpcomingbillsSeeder::class
+        ]);
     }
 }

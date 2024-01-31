@@ -8,6 +8,10 @@ use App\Http\Requests\V1\StoreUserRequest;
 use App\Http\Requests\V1\UpdateUserRequest;
 use App\Models\User;
 
+use App\Http\Resources\V1\UserResource;
+use App\Http\Resources\V1\UserCollection;
+
+
 
 
 class UserController extends Controller
@@ -15,6 +19,7 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
+
     // public function index()
     // {
     //      // Logic to get all users
@@ -22,16 +27,15 @@ class UserController extends Controller
     //      return response()->json($users);
     // }
     public function index(){
-        // $user = User::all();
+        // Logic to get all users
+        //return User::all(); 
 
-        // $data = [
-        //     'status'=>200,
-        //     'user'=>$user
-        // ];
-        // return response()->json($data, 200);
-        return User::all();
-        
-        
+        //Logic to store data in collection
+        //return new UserCollection(User::all());
+
+        //Logic to paginate the store data 
+        return new UserCollection(User::paginate());
+
     }
     /**
      * Show the form for creating a new resource.

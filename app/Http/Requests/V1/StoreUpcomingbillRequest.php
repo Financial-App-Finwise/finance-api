@@ -3,9 +3,8 @@
 namespace App\Http\Requests\V1;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
-class StoreUserRequest extends FormRequest
+class StoreUpcomingbillRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,10 +22,11 @@ class StoreUserRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'categoryID' => 'sometimes|required',
+            'amount' => 'sometimes|required',
+            'date' => 'sometimes|required|dateTime',
             'name' => 'sometimes|required',
-            'email' => 'sometimes|required|email',
-            'email_verified_at' => 'sometimes|required',
-            //'totalBalance' => 'sometimes|required|numeric',
+            'note' => 'sometimes|required',
             'created_at' => 'sometimes|required',
             'updated_at' => 'sometimes|required',
         ];

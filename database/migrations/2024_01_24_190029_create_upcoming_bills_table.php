@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('userID');
             $table->unsignedBigInteger('categoryID')->nullable();
             $table->decimal('amount', 10, 2)->default(0);
-            $table->date('date');
+            $table->dateTime('date');
             $table->string('name', 50)->nullable();
             $table->text('note')->nullable();
             $table->timestamps();

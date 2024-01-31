@@ -60,11 +60,42 @@ Route::group(['prefix' => 'auth'], function () {
 // });
 
 // // Route to get all users
-Route::get('/v1/users', [Api\V1\UserController::class, 'index']);
+Route::get('/users', [Api\V1\UserController::class, 'index']);
 // // Route to get a specific user by ID
-Route::get('/v1/users/{user}', [Api\V1\UserController::class, 'show']);
+Route::get('/users/{user}', [Api\V1\UserController::class, 'show']);
 // Route to create a new user
-Route::post('/v1/users', [Api\V1\UserController::class, 'store']);
+Route::post('/users', [Api\V1\UserController::class, 'store']);
 // Route to update a user by ID
-Route::put('/v1/users/{user}', [Api\V1\UserController::class, 'update']);
-Route::patch('/v1/users/{user}', [Api\V1\UserController::class, 'update']);
+Route::put('/users/{user}', [Api\V1\UserController::class, 'update']);
+Route::patch('/users/{user}', [Api\V1\UserController::class, 'update']);
+
+// Route to get all categories
+Route::get('/categories', [Api\V1\CategoryController::class, 'index']);
+// Route to get a specific categories by ID
+Route::get('/categories/{category}', [Api\V1\CategoryController::class, 'show']);
+// Route to create a new category
+Route::post('/categories', [Api\V1\CategoryController::class, 'store']);
+// Route to update a category by ID
+Route::put('/categories/{category}', [Api\V1\CategoryController::class, 'update']);
+Route::patch('/categories/{category}', [Api\V1\CategoryController::class, 'update']);
+
+// Route to get all upcomingbills
+Route::get('/upcomingbills', [Api\V1\UpcomingbillController::class, 'index']);
+// Route to get a specific upcomingbill by ID
+Route::get('/upcomingbills/{upcomingbill}', [Api\V1\UpcomingbillController::class, 'show']);
+// Route to create a new upcomingbill
+Route::post('/upcomingbills', [Api\V1\UpcomingbillController::class, 'store']);
+// Route to update a upcomingbill by ID
+Route::put('/upcomingbills/{upcomingbill}', [Api\V1\UpcomingbillController::class, 'update']);
+Route::patch('/upcomingbills/{upcomingbill}', [Api\V1\UpcomingbillController::class, 'update']);
+
+// Route to get all goals
+Route::get('/goals', [Api\V1\GoalController::class, 'index']);
+// Route to get a specific goal by ID
+Route::get('/goals/{goal}', [Api\V1\GoalController::class, 'show']);
+// Route to create a new goal
+Route::post('/goals', [Api\V1\GoalController::class, 'store']);
+// Route to update a goal by ID
+Route::put('/goals/{goal}', [Api\V1\GoalController::class, 'update']);
+Route::patch('/goals/{goal}', [Api\V1\GoalController::class, 'update']);
+

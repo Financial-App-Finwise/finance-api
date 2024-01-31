@@ -25,7 +25,6 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
         'password',
         'email_verification_code',
         'email_verified_at',
-        'totalBalance',
         'created_at',
         'updated_at',
     ];
@@ -60,10 +59,6 @@ public function getJWTCustomClaims()
 {
     return [];
 }
-public function parentcategories()
-{
-    return $this->hasMany(ParentCategory::class, 'userID');
-}
 
 public function categories()
 {
@@ -83,6 +78,10 @@ public function upcomingbills()
 public function transactions()
 {
     return $this->hasMany(Transaction::class);
+}
+public function transactiongoals()
+{
+    return $this->hasMany(TransactionGoal::class);
 }
 }
 
