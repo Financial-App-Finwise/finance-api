@@ -14,7 +14,7 @@ class UpdateGoalRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -27,16 +27,14 @@ class UpdateGoalRequest extends FormRequest
         $method = $this->method();
         if ($method == 'PUT') {
             return[
-                'name' => 'sometimes|required',
-                'amount' => 'sometimes|required||numeric',
-                'currentSave' => 'sometimes|required|numeric',
-                'remainingSave' => 'sometimes|required|numeric',
-                'setDate' => 'sometimes|required',
-                'startDate' => 'sometimes|required',
-                'endDate' => 'sometimes|required',
-                'monthlyContribution' => 'sometimes|required',
-                'created_at' => 'sometimes|required',
-                'updated_at' => 'sometimes|required',
+                'name' => 'required',
+                'amount' => 'required||numeric',
+                'currentSave' => 'required|numeric',
+                'remainingSave' => 'required|numeric',
+                'setDate' => 'required',
+                'startDate' => 'required',
+                'endDate' => 'required',
+                'monthlyContribution' => 'required',
             ];
         } else {
             return[
@@ -48,8 +46,6 @@ class UpdateGoalRequest extends FormRequest
                 'startDate' => 'sometimes|required',
                 'endDate' => 'sometimes|required',
                 'monthlyContribution' => 'sometimes|required',
-                'created_at' => 'sometimes|required',
-                'updated_at' => 'sometimes|required',
             ];
         }
     }

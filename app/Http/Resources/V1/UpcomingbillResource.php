@@ -20,7 +20,7 @@ class UpcomingbillResource extends JsonResource
             'userID' => $this->userID,
             'categoryID' => $this->categoryID,
             'amount' => $this->amount,
-            'date' => $this->dateTime,
+            'date' => $this->date->format('Y-m-d H:i:s'),
             'name' => $this->name,
             'note' => $this->note,
             'created_at' => $this->created_at,
@@ -28,5 +28,3 @@ class UpcomingbillResource extends JsonResource
             ];
     }
 }
-
-    

@@ -11,7 +11,7 @@ class UpdateUpcomingbillRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -24,23 +24,19 @@ class UpdateUpcomingbillRequest extends FormRequest
         $method = $this->method();
         if ($method == 'PUT') {
             return [
-                'categoryID' => 'sometimes|required',
-                'amount' => 'sometimes|required',
-                'date' => 'sometimes|required|dateTime',
-                'name' => 'sometimes|required',
-                'note' => 'sometimes|required',
-                'created_at' => 'sometimes|required',
-                'updated_at' => 'sometimes|required',
+                'categoryID' => 'required',
+                'amount' => 'required',
+                'date' => 'required|date_format:Y-m-d H:i:s',
+                'name' => 'sometimes',
+                'note' => 'sometimes',
             ];
         } else {
             return [
-                'categoryID' => 'sometimes|required',
-                'amount' => 'sometimes|required',
-                'date' => 'sometimes|required|dateTime',
-                'name' => 'sometimes|required',
-                'note' => 'sometimes|required',
-                'created_at' => 'sometimes|required',
-                'updated_at' => 'sometimes|required',
+                'categoryID' => 'sometimes',
+                'amount' => 'sometimes',
+                'date' => 'sometimes|date_format:Y-m-d H:i:s',
+                'name' => 'sometimes',
+                'note' => 'sometimes',
             ];
         }
     }

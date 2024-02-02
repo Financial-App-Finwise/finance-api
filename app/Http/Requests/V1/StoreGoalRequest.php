@@ -13,7 +13,7 @@ class StoreGoalRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -24,16 +24,15 @@ class StoreGoalRequest extends FormRequest
     public function rules(): array
     {
         return[
-            'name' => 'sometimes|required',
-            'amount' => 'sometimes|required',
-            'currentSave' => 'sometimes|required',
-            'remainingSave' => 'sometimes|required',
-            'setDate' => 'sometimes|required',
+            'userID' => 'required|exists:users,id',
+            'name' => 'required',
+            'amount' => 'required',
+            'currentSave' => 'required',
+            'remainingSave' => 'required',
+            'setDate' => 'required',
             'startDate' => 'sometimes|required',
             'endDate' => 'sometimes|required',
             'monthlyContribution' => 'sometimes|required',
-            'created_at' => 'sometimes|required',
-            'updated_at' => 'sometimes|required',
             ];
     }
 }

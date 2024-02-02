@@ -11,7 +11,7 @@ class StoreUpcomingbillRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,13 +22,12 @@ class StoreUpcomingbillRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'categoryID' => 'sometimes|required',
-            'amount' => 'sometimes|required',
-            'date' => 'sometimes|required|dateTime',
-            'name' => 'sometimes|required',
-            'note' => 'sometimes|required',
-            'created_at' => 'sometimes|required',
-            'updated_at' => 'sometimes|required',
+            'userID' => 'required|exists:users,id',
+            'categoryID' => 'required',
+            'amount' => 'required',
+            'date' => 'required|date_format:Y-m-d H:i:s',
+            'name' => 'required',
+            'note' => 'sometimes',
         ];
     }
 }

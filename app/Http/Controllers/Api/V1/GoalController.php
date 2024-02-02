@@ -78,6 +78,12 @@ class GoalController extends Controller
      */
     public function destroy(Goal $goal)
     {
+        // Check if the authenticated user is the owner of the goal
+        if ($user->id !== $goal->userID) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+            }
+            // Logic to delete a goal by ID
+            $goal->delete();
         // Logic to delete a goal by ID
         return response()->json(['message' => 'Goal deleted successfully']);
     }

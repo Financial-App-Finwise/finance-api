@@ -17,18 +17,7 @@ class UpcomingbillController extends Controller
      * Display a listing of the resource.
      */
 
-    // public function index()
-    // {
-    //      // Logic to get all upcomingbills
-    //      $upcomingbills = Upcomingbill::all();
-    //      return response()->json($upcomingbills);
-    // }
     public function index(){
-        // Logic to get all upcomingbills
-        //return Upcomingbill::all(); 
-
-        //Logic to store data in collection
-        //return new UpcomingbillCollection(Upcomingbill::all());
 
         //Logic to paginate the store data 
         return new UpcomingbillCollection(Upcomingbill::paginate());
@@ -42,7 +31,6 @@ class UpcomingbillController extends Controller
         // Logic to get a specific upcomingbill by ID
          $upcomingbill = Upcomingbill::find($id);
          return response()->json($upcomingbill);
-        //return $upcomingbill = Upcomingbill::find($id);
     }
 
     /**
@@ -77,7 +65,7 @@ class UpcomingbillController extends Controller
     public function update(UpdateUpcomingbillRequest $request, Upcomingbill $upcomingbill)
     {
         // Logic to update a upcomingbill by ID
-        $user->update($request->all());
+        $upcomingbill->update($request->all());
         return response()->json(['message' => 'Upcomingbill updated successfully']);
     }
     /**
@@ -85,6 +73,12 @@ class UpcomingbillController extends Controller
      */
     public function destroy(Upcomingbill $upcomingbill)
     {
+        // Check if the authenticated user is the owner of the upcomingbill
+        if ($user->id !== $upcomingbill->userID) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+            }
+            // Logic to delete a upcomingbill by ID
+            $upcomingbill->delete();
         // Logic to delete a upcomingbill by ID
         return response()->json(['message' => 'Upcomingbill deleted successfully']);
     }

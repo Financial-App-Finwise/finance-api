@@ -57,17 +57,6 @@ class CategoryController extends Controller
     {
         return new CategoryResource(Category::create($request->all()));
     }
-    // public function store(StoreCategoryRequest $request)
-    // {
-    //     $categoryData = $request->validated();
-    
-    //     // Explicitly set userID based on authenticated user or any other logic
-    //     $categoryData['userID'] = auth()->id(); // Assuming you are using Laravel's authentication
-    
-    //     $category = Category::create($categoryData);
-    
-    //     return new CategoryResource($category);
-    // }
     /**
      * Display the specified resource.
      */

@@ -35,11 +35,11 @@ class UpdateCategoryRequest extends FormRequest
         } else {
             return [
                 //'userID' => 'required|exists:users,id',
-                'name' => 'required',
-                'isIncome' => 'required',
-                'parentID' => 'required',
-                'level' => 'required',
-                'isOnboarding' => 'required',
+                'name' => 'sometimes|required',
+                'isIncome' => 'sometimes|required',
+                'parentID' => 'sometimes|required',
+                'level' => 'sometimes|required',
+                'isOnboarding' => 'sometimes|required',
             ];
         }
     }

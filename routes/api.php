@@ -93,6 +93,8 @@ Route::post('/upcomingbills', [Api\V1\UpcomingbillController::class, 'store']);
 // Route to update a upcomingbill by ID
 Route::put('/upcomingbills/{upcomingbill}', [Api\V1\UpcomingbillController::class, 'update']);
 Route::patch('/upcomingbills/{upcomingbill}', [Api\V1\UpcomingbillController::class, 'update']);
+// Route to delete a upcomingbill by ID
+Route::delete('/upcomingbills/{upcomingbill}', [Api\V1\UpcomingbillController::class, 'destroy']);
 
 // Route to get all goals
 Route::get('/goals', [Api\V1\GoalController::class, 'index']);
@@ -103,4 +105,5 @@ Route::post('/goals', [Api\V1\GoalController::class, 'store']);
 // Route to update a goal by ID
 Route::put('/goals/{goal}', [Api\V1\GoalController::class, 'update']);
 Route::patch('/goals/{goal}', [Api\V1\GoalController::class, 'update']);
-
+// Route to delete a goal by ID
+Route::delete('/goals/{goal}', [Api\V1\GoalController::class, 'destroy']);

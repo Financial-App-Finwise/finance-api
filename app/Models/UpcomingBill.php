@@ -9,6 +9,19 @@ class UpcomingBill extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'userID',
+        'categoryID',
+        'amount',
+        'date',
+        'name',
+        'note',
+    ];
+    
+    protected $casts = [
+        'date' => 'datetime',
+    ];
+
      public function user(){
         return $this->belongsTo(User::class);
     }
