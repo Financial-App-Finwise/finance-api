@@ -9,7 +9,16 @@ class CategoryQuery{
         'email' => ['eq'],
         'email_verified_at' => ['eq'],
         'password' => ['eq'],
-        //'created_at' => ['eq'],
-        //'updated_at' => ['eq'],
+        'created_at' => ['eq'],
+        'updated_at' => ['eq'],
     ];
+
+    protected $columnMap = [
+        'eq' => '=',
+        'lt' => '<',
+        'lte' => '=<',
+        'gt' => '>',
+        'gte' => '>=',
+    ];
+
     }
