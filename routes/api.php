@@ -18,9 +18,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
 
 
 // Authentication routes
@@ -28,7 +25,72 @@ Route::group(['prefix' => 'auth'], function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/verify-email', [AuthController::class, 'verifyEmail']);
     Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/logout', [AuthController::class, 'logout']);
+});
+
+Route::group([
+    'middleware' => ['auth:sanctum'],
+], function () {
+    Route::group(['prefix' => 'auth'], function () {
+        Route::post('/logout', [AuthController::class, 'logout']);
+        Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+        Route::get('/forgot-password-code', [AuthController::class, 'forgotPasswordCode']);
+        Route::post('/forgot-password-reset', [AuthController::class, 'forgotPasswordReset']);
+    });
+});
+    
+Route::group(['prefix' => 'budgetplans'], function () {
+    Route::get('/', [Api\V1\BudgetPlanController::class, 'index']);
+    Route::get('/year/{year}', [Api\V1\BudgetPlanController::class, 'showYear']);
+    Route::get('/{budgetplan}', [Api\V1\BudgetPlanController::class, 'show']);
+    Route::post('/', [Api\V1\BudgetPlanController::class, 'store']);
+    Route::put('/{budgetplan}', [Api\V1\BudgetPlanController::class, 'update']);
+    Route::patch('/{budgetplan}', [Api\V1\BudgetPlanController::class, 'update']);
+    Route::delete('/{budgetplan}', [Api\V1\BudgetPlanController::class, 'destroy']);
+});
+
+Route::group(['prefix' => 'onboardinginfo'], function () {
+    Route::get('/', [Api\V1\OnboardingInfoController::class, 'index']);
+    Route::get('/{onboardinginfo}', [Api\V1\OnboardingInfoController::class, 'show']);
+    Route::post('/', [Api\V1\OnboardingInfoController::class, 'store']);
+    Route::put('/{onboardinginfo}', [Api\V1\OnboardingInfoController::class, 'update']);
+    Route::patch('/{onboardinginfo}', [Api\V1\OnboardingInfoController::class, 'update']);
+    Route::delete('/{onboardinginfo}', [Api\V1\OnboardingInfoController::class, 'destroy']);
+});
+
+Route::group(['prefix' => 'users'], function () {
+    Route::get('/', [Api\V1\UserController::class, 'index']);
+    Route::get('/{user}', [Api\V1\UserController::class, 'show']);
+    Route::post('/', [Api\V1\UserController::class, 'store']);
+    Route::put('/{user}', [Api\V1\UserController::class, 'update']);
+    Route::patch('/{user}', [Api\V1\UserController::class, 'update']);
+    Route::delete('/{user}', [Api\V1\UserController::class, 'destroy']);
+});
+
+Route::group(['prefix' => 'categories'], function () {
+    Route::get('/', [Api\V1\CategoryController::class, 'index']);
+    Route::get('/{category}', [Api\V1\CategoryController::class, 'show']);
+    Route::post('/', [Api\V1\CategoryController::class, 'store']);
+    Route::put('/{category}', [Api\V1\CategoryController::class, 'update']);
+    Route::patch('/{category}', [Api\V1\CategoryController::class, 'update']);
+    Route::delete('/{category}', [Api\V1\CategoryController::class, 'destroy']);
+});
+
+Route::group(['prefix' => 'upcomingbills'], function () {
+    Route::get('/', [Api\V1\UpcomingbillController::class, 'index']);
+    Route::get('/{upcomingbill}', [Api\V1\UpcomingbillController::class, 'show']);
+    Route::post('/', [Api\V1\UpcomingbillController::class, 'store']);
+    Route::put('/{upcomingbill}', [Api\V1\UpcomingbillController::class, 'update']);
+    Route::patch('/{upcomingbill}', [Api\V1\UpcomingbillController::class, 'update']);
+    Route::delete('/{upcomingbill}', [Api\V1\UpcomingbillController::class, 'destroy']);
+});
+
+Route::group(['prefix' => 'goals'], function () {
+    Route::get('/', [Api\V1\GoalController::class, 'index']);
+    Route::get('/{goal}', [Api\V1\GoalController::class, 'show']);
+    Route::post('/', [Api\V1\GoalController::class, 'store']);
+    Route::put('/{goal}', [Api\V1\GoalController::class, 'update']);
+    Route::patch('/{goal}', [Api\V1\GoalController::class, 'update']);
+    Route::delete('/{goal}', [Api\V1\GoalController::class, 'destroy']);
 });
 
 
@@ -58,52 +120,3 @@ Route::group(['prefix' => 'auth'], function () {
 // Route::group(['prefix'=>'v1', 'namespace' => 'App\Http\Controllers\Api\V1'], function(){
 //     Route::apiResource('users', UserController::class);
 // });
-
-// // Route to get all users
-Route::get('/users', [Api\V1\UserController::class, 'index']);
-// // Route to get a specific user by ID
-Route::get('/users/{user}', [Api\V1\UserController::class, 'show']);
-// Route to create a new user
-Route::post('/users', [Api\V1\UserController::class, 'store']);
-// Route to update a user by ID
-Route::put('/users/{user}', [Api\V1\UserController::class, 'update']);
-Route::patch('/users/{user}', [Api\V1\UserController::class, 'update']);
-// Route to delete a user by ID
-Route::delete('/users/{user}', [Api\V1\UserController::class, 'destroy']);
-
-
-// Route to get all categories
-Route::get('/categories', [Api\V1\CategoryController::class, 'index']);
-// Route to get a specific categories by ID
-Route::get('/categories/{category}', [Api\V1\CategoryController::class, 'show']);
-// Route to create a new category
-Route::post('/categories', [Api\V1\CategoryController::class, 'store']);
-// Route to update a category by ID
-Route::put('/categories/{category}', [Api\V1\CategoryController::class, 'update']);
-Route::patch('/categories/{category}', [Api\V1\CategoryController::class, 'update']);
-// Route to delete a category by ID
-Route::delete('/categories/{category}', [Api\V1\CategoryController::class, 'destroy']);
-
-// Route to get all upcomingbills
-Route::get('/upcomingbills', [Api\V1\UpcomingbillController::class, 'index']);
-// Route to get a specific upcomingbill by ID
-Route::get('/upcomingbills/{upcomingbill}', [Api\V1\UpcomingbillController::class, 'show']);
-// Route to create a new upcomingbill
-Route::post('/upcomingbills', [Api\V1\UpcomingbillController::class, 'store']);
-// Route to update a upcomingbill by ID
-Route::put('/upcomingbills/{upcomingbill}', [Api\V1\UpcomingbillController::class, 'update']);
-Route::patch('/upcomingbills/{upcomingbill}', [Api\V1\UpcomingbillController::class, 'update']);
-// Route to delete a upcomingbill by ID
-Route::delete('/upcomingbills/{upcomingbill}', [Api\V1\UpcomingbillController::class, 'destroy']);
-
-// Route to get all goals
-Route::get('/goals', [Api\V1\GoalController::class, 'index']);
-// Route to get a specific goal by ID
-Route::get('/goals/{goal}', [Api\V1\GoalController::class, 'show']);
-// Route to create a new goal
-Route::post('/goals', [Api\V1\GoalController::class, 'store']);
-// Route to update a goal by ID
-Route::put('/goals/{goal}', [Api\V1\GoalController::class, 'update']);
-Route::patch('/goals/{goal}', [Api\V1\GoalController::class, 'update']);
-// Route to delete a goal by ID
-Route::delete('/goals/{goal}', [Api\V1\GoalController::class, 'destroy']);
