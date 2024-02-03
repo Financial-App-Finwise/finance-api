@@ -182,10 +182,8 @@ class AuthController extends Controller
     public function resetPassword(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'user_id' => 'required',
             'password' => 'required|string|confirmed|min:8',
         ], [
-            'user_id.required' => 'user_id_is_required',
             'password.required' => 'password_required',
             'password.confirmed' => 'password_confirmation_not_match',
             'password.min' => 'password_must_be_at_least_8_characters'
@@ -194,7 +192,8 @@ class AuthController extends Controller
             return response()->json(['success' => 'false', 'code' => 1, 'message' => implode(", ", $validator->errors()->all())])->setStatusCode(422);
         }
 
-        $user = User::findOrFail($request->user_id);
+        # find user by bearer token
+        $user = $request->user();
         $user->password = bcrypt($request->password);
         $user->save();
 

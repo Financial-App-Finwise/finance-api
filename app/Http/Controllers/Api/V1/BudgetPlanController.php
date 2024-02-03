@@ -34,32 +34,6 @@ class BudgetPlanController extends Controller
         return response()->json($budgetplan);
     }
 
-    public function showYear($year)
-    {
-        // Assuming you have a relationship between User and BudgetPlan
-        // Adjust the relationship method based on your actual Eloquent setup
-
-        // Retrieve the authenticated user
-        $user = auth()->user();
-
-        // Retrieve budget plans for the specified year, sorted by month
-        $budgetPlans = $user->budgetPlans()
-            ->whereYear('created_at', $year)
-            ->orderBy('created_at')
-            ->get();
-
-        // Transform the data into the desired nested structure
-        $nestedData = [];
-
-        foreach ($budgetPlans as $budgetPlan) {
-            $month = $budgetPlan->created_at->format('F'); // Get the month name
-            $nestedData[$month][] = $budgetPlan;
-        }
-
-        // Return the nested data as JSON response
-        return response()->json([$year => $nestedData]);
-    }
-
 
     /**
      * Store a newly created resource in storage.

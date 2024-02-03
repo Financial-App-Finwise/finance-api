@@ -25,6 +25,10 @@ Route::group(['prefix' => 'auth'], function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/verify-email', [AuthController::class, 'verifyEmail']);
     Route::post('/login', [AuthController::class, 'login']);
+
+    // These routes do not require authentication middleware
+    Route::get('/forgot-password-code', [AuthController::class, 'forgotPasswordCode']);
+    Route::post('/forgot-password-reset', [AuthController::class, 'forgotPasswordReset']);
 });
 
 Route::group([
@@ -33,20 +37,18 @@ Route::group([
     Route::group(['prefix' => 'auth'], function () {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::post('/reset-password', [AuthController::class, 'resetPassword']);
-        Route::get('/forgot-password-code', [AuthController::class, 'forgotPasswordCode']);
-        Route::post('/forgot-password-reset', [AuthController::class, 'forgotPasswordReset']);
     });
-});
-    
-Route::group(['prefix' => 'budgetplans'], function () {
-    Route::get('/', [Api\V1\BudgetPlanController::class, 'index']);
-    Route::get('/year/{year}', [Api\V1\BudgetPlanController::class, 'showYear']);
-    Route::get('/{budgetplan}', [Api\V1\BudgetPlanController::class, 'show']);
-    Route::post('/', [Api\V1\BudgetPlanController::class, 'store']);
-    Route::put('/{budgetplan}', [Api\V1\BudgetPlanController::class, 'update']);
-    Route::patch('/{budgetplan}', [Api\V1\BudgetPlanController::class, 'update']);
-    Route::delete('/{budgetplan}', [Api\V1\BudgetPlanController::class, 'destroy']);
-});
+
+    Route::group(['prefix' => 'budgetplans'], function () {
+        Route::get('/', [Api\V1\BudgetPlanController::class, 'index']);
+        Route::get('/{budgetplan}', [Api\V1\BudgetPlanController::class, 'show']);
+        Route::post('/', [Api\V1\BudgetPlanController::class, 'store']);
+        Route::put('/{budgetplan}', [Api\V1\BudgetPlanController::class, 'update']);
+        Route::patch('/{budgetplan}', [Api\V1\BudgetPlanController::class, 'update']);
+        Route::delete('/{budgetplan}', [Api\V1\BudgetPlanController::class, 'destroy']);
+    });
+}); 
+
 
 Route::group(['prefix' => 'onboardinginfo'], function () {
     Route::get('/', [Api\V1\OnboardingInfoController::class, 'index']);
