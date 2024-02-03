@@ -156,7 +156,7 @@ class AuthController extends Controller
             'success' => 'true',
             'api_token' => $token,
             'token_type' => 'bearer',
-            'data' => auth('api')->user()
+            'data' => $user
         ]);
         }
 
