@@ -264,7 +264,7 @@ class GoalsSeeder extends Seeder
         ],
         [
             'userID' => 11,
-            'name' => 'Home Security System',
+            'name' => 'Test Home Security System',
             'amount' => 1800.00,
             'currentSave' => 360.00,
             'remainingSave' => 1440.00,
@@ -272,6 +272,7 @@ class GoalsSeeder extends Seeder
             'startDate' => '2023-08-01',
             'endDate' => '2024-08-01',
             'monthlyContribution' => 120.00,
+            //'created_at' => Goal::now()->format('Y-m-d H:i:s'),
             'created_at' => now(),
             'updated_at' => now(),
         ],
