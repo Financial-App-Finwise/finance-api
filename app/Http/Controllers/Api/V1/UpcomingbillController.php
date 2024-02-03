@@ -7,7 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\StoreUpcomingbillRequest;
 use App\Http\Requests\V1\UpdateUpcomingbillRequest;
 
-use App\Models\Upcomingbill;
+use App\Models\UpcomingBill;
 use App\Http\Resources\V1\UpcomingbillResource;
 use App\Http\Resources\V1\UpcomingbillCollection;
 
@@ -20,7 +20,7 @@ class UpcomingbillController extends Controller
     public function index(){
 
         //Logic to paginate the store data 
-        return new UpcomingbillCollection(Upcomingbill::paginate());
+        return new UpcomingbillCollection(UpcomingBill::paginate());
     }
 
     /**
