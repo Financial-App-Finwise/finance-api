@@ -12,32 +12,38 @@ use App\Models\Category;
 use App\Http\Resources\V1\CategoryResource;
 use App\Http\Resources\V1\CategoryCollection;
 
+use App\Filters\V1\CategoryFilter;
+
 
 class CategoryController extends Controller
 {
-    public function index(){
-        //Logic to get all categories
-        //return Category::all(); 
+    public function index(Request $request)
+    {
+        $filter = new CategoryFilter();
+        $queryItems = $filter->transform($request); //[['column', 'operator', 'value']]
+        
+        if (count($queryItems) == 0){
+            return new CategoryCollection(Category::paginate());
+        } else{ 
 
-        //Logic to store data in collection
-        //return new CategoryCollection(Category::all());
+            $category = Category::where($queryItems)->paginate();
 
-        //Logic to paginate the store data 
-        return new CategoryCollection(Category::paginate());
+            return new CategoryCollection($category->appends($request->query()));
+
+            //return new CategoryCollection(Category::where($queryItems)->paginate());
+        }
     }
 
-    //test with search
-    // public function index(Request $request)
-    // {
-    //     $filter = new CategoryQuery();
-    //     $queryItems = $filter->transform($request); //[['column', 'operator', 'value']]
-        
-    //     if (count($queryItems) == 0){
-    //         return new CategoryCollection(Category::paginate());
-    //     } else{ 
+    //Normal index function but we don't need it
+    // public function index(){
+    //     //Logic to get all categories
+    //     //return Category::all(); 
 
-    //         return new CategoryCollection(Category::where($queryItems)->paginate());
-    //     }
+    //     //Logic to store data in collection
+    //     //return new CategoryCollection(Category::all());
+
+    //     //Logic to paginate the store data 
+    //     return new CategoryCollection(Category::paginate());
     // }
 
     /**

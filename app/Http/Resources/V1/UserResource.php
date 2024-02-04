@@ -23,6 +23,10 @@ class UserResource extends JsonResource
             'password' => $this->password,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            //Call related data
+            'category' => CategoryResource::collection($this->whenLoaded('categories')),
+            'upcomingbill' => UpcomingbillResource::collection($this->whenLoaded('upcoming_bills')),
+            'goal' => GoalResource::collection($this->whenLoaded('goals')),
             ];
     }
 }

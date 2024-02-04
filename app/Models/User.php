@@ -9,6 +9,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use Mehradsadeghi\FilterQueryString\FilterQueryString;
+
 
 class User extends Authenticatable implements JWTSubject, MustVerifyEmail
 {
@@ -67,14 +69,13 @@ public function categories()
 
 public function goals()
 {
-    return $this->hasMany(Goal::class);
+    return $this->hasMany(Goal::class, 'userID');
 }
 
-public function upcomingbills()
+public function upcoming_bills()
 {
-    return $this->hasMany(UpcomingBill::class);
+    return $this->hasMany(UpcomingBill::class, 'userID');
 }
-
 public function transactions()
 {
     return $this->hasMany(Transaction::class);

@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Http\Resources\V1\UserResource;
 use App\Http\Resources\V1\UserCollection;
 
+use App\Filters\V1\UserFilter;
 
 
 
@@ -20,23 +21,44 @@ class UserController extends Controller
      * Display a listing of the resource.
      */
 
-    // public function index()
-    // {
-    //      // Logic to get all users
-    //      $users = User::all();
-    //      return response()->json($users);
+     //test query
+    public function index(Request $request)
+    {
+        $filter = new UserFilter();
+        $filterItems = $filter->transform($request); //[['column', 'operator', 'value']]
+
+        //include related data 
+        $includeCategory = $request->query('includeCategory');
+        $includeUpcomingbill = $request->query('includeUpcomingbill');
+        $includeGoal = $request->query('includeGoal');
+
+        $user = User::where($filterItems);
+
+        if ($includeCategory){
+            $user = $user->with('categories');
+        }
+        if ($includeUpcomingbill){
+            $user = $user->with('upcoming_bills');
+        }
+        if ($includeGoal){
+            $user = $user->with('goals');
+        }
+        return new UserCollection($user->paginate()->appends($request->query()));
+            
+        }
+        //return new UserCollection(User::where($queryItems)->paginate());
+
+    // public function index(){
+    //     // Logic to get all users
+    //     //return User::all(); 
+
+    //     //Logic to store data in collection
+    //     //return new UserCollection(User::all());
+
+    //     //Logic to paginate the store data 
+    //     return new UserCollection(User::paginate());
+
     // }
-    public function index(){
-        // Logic to get all users
-        //return User::all(); 
-
-        //Logic to store data in collection
-        //return new UserCollection(User::all());
-
-        //Logic to paginate the store data 
-        return new UserCollection(User::paginate());
-
-    }
     /**
      * Show the form for creating a new resource.
      */
@@ -62,6 +84,22 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
+        //include related data 
+        $includeCategory = request()->query('includeCategory');
+        $includeUpcomingbill = request()->query('includeUpcomingbill');
+        $includeGoal = request()->query('includeGoal');
+
+        $user->loadMissing(['categories', 'upcoming_bills', 'goals']);
+        
+        if ($includeCategory) {
+            return new UserResource($user);
+        }
+        if ($includeUpcomingbill) {
+            return new UserResource($user);
+        }
+        if ($includeGoal) {
+            return new UserResource($user);
+        }
         // Logic to get a specific user by ID
         return response()->json($user);
     }

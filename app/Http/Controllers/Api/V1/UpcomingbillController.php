@@ -11,17 +11,34 @@ use App\Models\UpcomingBill;
 use App\Http\Resources\V1\UpcomingbillResource;
 use App\Http\Resources\V1\UpcomingbillCollection;
 
+use App\Filters\V1\UpcomingBillFilter;
+
 class UpcomingbillController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
 
-    public function index(){
+     public function index(Request $request)
+    {
+        $filter = new UpcomingBillFilter();
+        $queryItems = $filter->transform($request); //[['column', 'operator', 'value']]
+        
+        if (count($queryItems) == 0){
+            return new UpcomingbillCollection(UpcomingBill::paginate());
+        } else{ 
 
-        //Logic to paginate the store data 
-        return new UpcomingbillCollection(UpcomingBill::paginate());
+            $upcomingbill = UpcomingBill::where($queryItems)->paginate();
+
+            return new UpcomingbillCollection($upcomingbill->appends($request->query()));
+        }
     }
+
+    // public function index(){
+
+    //     //Logic to paginate the store data 
+    //     return new UpcomingbillCollection(UpcomingBill::paginate());
+    // }
 
     /**
      * Show the form for creating a new resource.

@@ -11,22 +11,42 @@ use App\Models\Goal;
 use App\Http\Resources\V1\GoalResource;
 use App\Http\Resources\V1\GoalCollection;
 
+use App\Filters\V1\GoalFilter;
+
+
 class GoalController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(){
-        // Logic to get all goals
-        //return Goal::all(); 
 
-        //Logic to store data in collection
-        //return new GoalCollection(Goal::all());
+    public function index(Request $request)
+    {
+        $filter = new GoalFilter();
+        $queryItems = $filter->transform($request); //[['column', 'operator', 'value']]
+        
+        if (count($queryItems) == 0){
+            return new GoalCollection(Goal::paginate());
+        } else{ 
 
-        //Logic to paginate the store data 
-        return new GoalCollection(Goal::paginate());
+            $goal = Goal::where($queryItems)->paginate();
 
+            return new GoalCollection($goal->appends($request->query()));
+
+            //return new CategoryCollection(Category::where($queryItems)->paginate());
+        }
     }
+    // public function index(){
+    //     // Logic to get all goals
+    //     //return Goal::all(); 
+
+    //     //Logic to store data in collection
+    //     //return new GoalCollection(Goal::all());
+
+    //     //Logic to paginate the store data 
+    //     return new GoalCollection(Goal::paginate());
+
+    // }
     /**
      * Show the form for creating a new resource.
      */
