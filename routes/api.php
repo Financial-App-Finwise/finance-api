@@ -40,12 +40,14 @@ Route::group([
     });
 
     Route::group(['prefix' => 'budgetplans'], function () {
-        Route::get('/', [Api\V1\BudgetPlanController::class, 'index']);
-        Route::get('/{budgetplan}', [Api\V1\BudgetPlanController::class, 'show']);
         Route::post('/', [Api\V1\BudgetPlanController::class, 'store']);
+        Route::delete('/{budgetplan}', [Api\V1\BudgetPlanController::class, 'destroy']);
         Route::put('/{budgetplan}', [Api\V1\BudgetPlanController::class, 'update']);
         Route::patch('/{budgetplan}', [Api\V1\BudgetPlanController::class, 'update']);
-        Route::delete('/{budgetplan}', [Api\V1\BudgetPlanController::class, 'destroy']);
+        
+        
+        Route::get('/{year}', [Api\V1\BudgetPlanController::class, 'index']);
+        Route::get('/{budgetplan}', [Api\V1\BudgetPlanController::class, 'show']);
     });
 }); 
 

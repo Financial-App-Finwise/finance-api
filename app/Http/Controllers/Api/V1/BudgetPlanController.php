@@ -10,17 +10,42 @@ use App\Http\Requests\V1\UpdateBudgetPlanRequest;
 use App\Models\BudgetPlan;
 use App\Http\Resources\V1\BudgetPlanResource;
 use App\Http\Resources\V1\BudgetPlanCollection;
+use Carbon\Carbon;
+
 
 class BudgetPlanController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index($year)
     {
-        // Logic to paginate the budget plan data
-        return new BudgetPlanCollection(BudgetPlan::paginate());
+        // get user id
+        $user = auth()->user();
+    
+        // retrieve budget plans for a specific year and group by month
+        $budgetPlans = BudgetPlan::where('userID', $user->id)
+                        ->whereYear('created_at', $year)
+                        ->orderBy('created_at', 'asc')
+                        ->get()
+                        ->groupBy(function($date) {
+                            return Carbon::parse($date->created_at)->format('m');
+                        });
+    
+        $formattedData = [];
+    
+        foreach ($budgetPlans as $key => $value) {
+            $formattedData[$this->getMonthName($key)] = $value->toArray();
+        }
+    
+        return response()->json(['data' => $formattedData]);
     }
+    
+    private function getMonthName($monthNumber)
+    {
+        return date("F", mktime(0, 0, 0, $monthNumber, 1));
+    }
+    
 
     /**
      * Show the form for creating a new resource.
@@ -41,6 +66,11 @@ class BudgetPlanController extends Controller
     public function store(StoreBudgetPlanRequest $request)
     {
         // Logic to create a new budget plan
+        # get user id from jwt token
+        $user = auth()->user();
+        # add user id to the request
+        $request->merge(['userID' => $user->id]);
+
         return new BudgetPlanResource(BudgetPlan::create($request->all()));
     }
 
@@ -66,38 +96,45 @@ class BudgetPlanController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateBudgetPlanRequest $request, BudgetPlan $budgetPlan)
+    public function update(UpdateBudgetPlanRequest $request, BudgetPlan $budgetplan)
     {
         // Validate the request using the UpdateBudgetPlanRequest class
     
         // Check if the model is retrieved successfully
-        if (!$budgetPlan) {
+        if (!$budgetplan) {
             return response()->json(['error' => 'Budget Plan not found'], 404);
         }
     
+        # add user id to the request
+        $user = auth()->user();
+        # check if the budget plan belongs to the user
+        if ($budgetplan->userID != $user->id) {
+            return response()->json(['success'=> 'false', 'message' => 'You are not authorized to delete this budget plan'], 403);
+        }
+        
         // Logic to update a budget plan by ID
         try {
-            $budgetPlan->update($request->validated());
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to update Budget Plan'], 500);
+            $budgetplan->update($request->validated());
+        } catch (Exception $e) {
+            return response()->json(['success'=> 'false', 'message' => 'Failed to update Budget Plan'], 500);
         }
     
-        return response()->json(['message' => 'Budget Plan updated successfully']);
+        return response()->json(['success'=> 'true', 'message' => 'Budget Plan updated successfully']);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(BudgetPlan $budgetPlan)
+    public function destroy(BudgetPlan $budgetplan)
     {
-        // Check if the authenticated user is the owner of the budget plan
-        if ($user->id !== $budgetPlan->userID) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+        # check if the budget plan belongs to the user
+        if ($budgetplan->userID != $user->id) {
+            return response()->json(['success'=> 'false', 'message' => 'You are not authorized to delete this budget plan'], 403);
         }
 
         // Logic to delete a budget plan by ID
-        $budgetPlan->delete();
+        $budgetplan->delete();
 
-        return response()->json(['message' => 'Budget Plan deleted successfully']);
+        return response()->json(['success'=> 'false', 'message' => 'Budget Plan deleted successfully']);
     }
 }

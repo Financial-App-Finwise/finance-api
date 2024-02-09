@@ -23,7 +23,6 @@ class StoreBudgetPlanRequest extends FormRequest
     {
         return [
             //
-            'userID' => 'required|exists:users,id',
             'categoryID' => 'required|exists:categories,id',
             'isMonthly' => 'required|in:0,1',
             'name' => 'required|string|max:50',

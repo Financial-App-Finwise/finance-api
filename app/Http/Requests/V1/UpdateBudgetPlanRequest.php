@@ -23,7 +23,6 @@ class UpdateBudgetPlanRequest extends FormRequest
     {
         return [
             //
-            'userID' => 'sometimes|required|exists:users,id',
             'categoryID' => 'sometimes|required|exists:categories,id',
             'isMonthly' => 'required|in:0,1',
             'name' => 'sometimes|required|string|max:50',
