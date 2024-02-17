@@ -18,14 +18,15 @@ class BudgetPlanController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index($year)
+    public function index(string $year, string $month)
     {
         // get user id
         $user = auth()->user();
     
-        // retrieve budget plans for a specific year and group by month
+        // retrieve budget plans for a specific year and month, and group by month
         $budgetPlans = BudgetPlan::where('userID', $user->id)
                         ->whereYear('created_at', $year)
+                        ->whereMonth('created_at', $month)
                         ->orderBy('created_at', 'asc')
                         ->get()
                         ->groupBy(function($date) {
@@ -38,8 +39,9 @@ class BudgetPlanController extends Controller
             $formattedData[$this->getMonthName($key)] = $value->toArray();
         }
     
-        return response()->json(['success'=> 'true', 'data' => $formattedData]);
+        return response()->json(['success' => 'true', 'data' => $formattedData]);
     }
+    
     
     private function getMonthName($monthNumber)
     {
@@ -79,6 +81,35 @@ class BudgetPlanController extends Controller
         // Logic to get a specific budget plan by ID
         return response()->json($budgetplan);
     }
+        /**
+     * Display the specified resource.
+     */
+    public function show_summary(string $year)
+    {
+        // get user id
+        $user = auth()->user();
+    
+        // retrieve budget plans for a specific year and group by month
+        $budgetPlans = BudgetPlan::where('userID', $user->id)
+                        ->whereYear('created_at', $year)
+                        ->orderBy('created_at', 'asc')
+                        ->get()
+                        ->groupBy(function($date) {
+                            return Carbon::parse($date->created_at)->format('m');
+                        });
+    
+        $formattedData = [];
+    
+        // Loop through all months (1 to 12) and set count to 0 if no items found
+        for ($month = 1; $month <= 12; $month++) {
+            $key = str_pad($month, 2, '0', STR_PAD_LEFT); // Format month with leading zero
+            $formattedData[$this->getMonthName($key)] = isset($budgetPlans[$key]) ? count($budgetPlans[$key]) : 0;
+        }
+    
+        return response()->json(['success' => 'true', 'data' => $formattedData]);
+    }
+    
+    
     
 
     /**
