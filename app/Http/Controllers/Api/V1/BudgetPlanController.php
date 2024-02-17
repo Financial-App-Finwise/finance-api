@@ -38,7 +38,7 @@ class BudgetPlanController extends Controller
             $formattedData[$this->getMonthName($key)] = $value->toArray();
         }
     
-        return response()->json(['data' => $formattedData]);
+        return response()->json(['success'=> 'true', 'data' => $formattedData]);
     }
     
     private function getMonthName($monthNumber)
@@ -52,9 +52,6 @@ class BudgetPlanController extends Controller
      */
     public function create()
     {
-        // Logic to get a specific budget plan by ID
-        // Assuming you want to create a form on the client-side
-        // You can return a view or a response as needed
         $budgetplan = BudgetPlan::find($id);
         return response()->json($budgetplan);
     }
@@ -71,7 +68,7 @@ class BudgetPlanController extends Controller
         # add user id to the request
         $request->merge(['userID' => $user->id]);
 
-        return new BudgetPlanResource(BudgetPlan::create($request->all()));
+        return response()->json(['success'=> 'true', 'data' => new BudgetPlanResource(BudgetPlan::create($request->all()))]);
     }
 
     /**
@@ -102,14 +99,14 @@ class BudgetPlanController extends Controller
     
         // Check if the model is retrieved successfully
         if (!$budgetplan) {
-            return response()->json(['error' => 'Budget Plan not found'], 404);
+            return response()->json(['success'=> 'false', 'message' => 'Budget Plan not found'], 404);
         }
     
         # add user id to the request
         $user = auth()->user();
         # check if the budget plan belongs to the user
         if ($budgetplan->userID != $user->id) {
-            return response()->json(['success'=> 'false', 'message' => 'You are not authorized to delete this budget plan'], 403);
+            return response()->json(['success'=> 'false', 'message' => 'You are not authorized to update this budget plan'], 403);
         }
         
         // Logic to update a budget plan by ID
@@ -128,6 +125,7 @@ class BudgetPlanController extends Controller
     public function destroy(BudgetPlan $budgetplan)
     {
         # check if the budget plan belongs to the user
+        $user = auth()->user();
         if ($budgetplan->userID != $user->id) {
             return response()->json(['success'=> 'false', 'message' => 'You are not authorized to delete this budget plan'], 403);
         }
@@ -135,6 +133,6 @@ class BudgetPlanController extends Controller
         // Logic to delete a budget plan by ID
         $budgetplan->delete();
 
-        return response()->json(['success'=> 'false', 'message' => 'Budget Plan deleted successfully']);
+        return response()->json(['success'=> 'true', 'message' => 'Budget Plan deleted successfully']);
     }
 }

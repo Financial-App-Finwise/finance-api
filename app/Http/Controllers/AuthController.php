@@ -153,11 +153,11 @@ class AuthController extends Controller
             $session->save();
 
             return response()->json([
-            'success' => 'true',
-            'api_token' => $token,
-            'token_type' => 'bearer',
-            'data' => $user
-        ]);
+                'success' => 'true',
+                'api_token' => $token,
+                'token_type' => 'bearer',
+                'data' => $user
+            ]);
         }
 
         throw ValidationException::withMessages(['email' => ['The provided credentials are incorrect.']]);

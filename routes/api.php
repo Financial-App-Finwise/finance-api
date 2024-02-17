@@ -40,14 +40,25 @@ Route::group([
     });
 
     Route::group(['prefix' => 'budgetplans'], function () {
+        Route::get('/{year}', [Api\V1\BudgetPlanController::class, 'index']);
+        Route::get('/{budgetplan}', [Api\V1\BudgetPlanController::class, 'show']);
         Route::post('/', [Api\V1\BudgetPlanController::class, 'store']);
         Route::delete('/{budgetplan}', [Api\V1\BudgetPlanController::class, 'destroy']);
         Route::put('/{budgetplan}', [Api\V1\BudgetPlanController::class, 'update']);
         Route::patch('/{budgetplan}', [Api\V1\BudgetPlanController::class, 'update']);
+    });
+    Route::group(['prefix' => 'myfinances'], function () {
+        Route::get('/', [Api\V1\MyFinanceController::class, 'create']);
+        Route::put('/update-net-worth', [Api\V1\MyFinanceController::class, 'update']);
+        Route::patch('/update-net-worth', [Api\V1\MyFinanceController::class, 'update']);
+        Route::get('/currency', [Api\V1\MyFinanceController::class, 'show_currency']);
+        Route::get('/view-my-finance/{filter}', [Api\V1\MyFinanceController::class, 'show']);
+        
+
+        Route::get('/view-my-finance/', [Api\V1\MyFinanceController::class, 'index']);
+
         
         
-        Route::get('/{year}', [Api\V1\BudgetPlanController::class, 'index']);
-        Route::get('/{budgetplan}', [Api\V1\BudgetPlanController::class, 'show']);
     });
 }); 
 
