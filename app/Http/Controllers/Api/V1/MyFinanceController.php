@@ -29,7 +29,7 @@ class MyFinanceController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $filter)
+    public function show()
     { 
         // get user id
         $user = auth()->user();
@@ -82,15 +82,22 @@ class MyFinanceController extends Controller
     public function update(UpdateMyFinanceRequest $request, MyFinance $myfinance)
     {
         // Validate the request data
+        $user = auth()->user();
         $data = $request->validated();
 
         try {
-            $myfinance->where('userID', auth()->user()->id)->update(['totalbalance' => $data['totalbalance']]);
+            $myfinance->where('userID', $user->id)->update(['totalbalance' => $data['totalbalance']]);
+
+            $updatedMyFinance = MyFinance::where('userID', $user->id)
+            // ->where('your_column_name', $filter)
+            ->with('currency')
+            ->get();
+
         } catch (Exception $e) {
             return response()->json(['success'=> 'false', 'message' => 'Failed to update Net Worth'], 500);
         }
 
-        return response()->json(['success'=> 'true', 'message' => 'Net Worth updated successfully']);
+        return response()->json(['success'=> 'true', 'message' => 'Net Worth updated successfully', 'data' => MyFinanceResource::collection($updatedMyFinance)]);
     }
 
     /**

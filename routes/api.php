@@ -4,6 +4,7 @@ use App\Http\Requests\V1\UpdateUserRequest;
 
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserOnboardingInfoController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -49,29 +50,24 @@ Route::group([
         Route::patch('/{budgetplan}', [Api\V1\BudgetPlanController::class, 'update']);
     });
     Route::group(['prefix' => 'myfinances'], function () {
-        Route::get('/', [Api\V1\MyFinanceController::class, 'create']);
+        Route::post('/', [Api\V1\MyFinanceController::class, 'create']);
+        Route::get('/currency', [Api\V1\MyFinanceController::class, 'show_currency']);
         Route::put('/update-net-worth', [Api\V1\MyFinanceController::class, 'update']);
         Route::patch('/update-net-worth', [Api\V1\MyFinanceController::class, 'update']);
-        Route::get('/currency', [Api\V1\MyFinanceController::class, 'show_currency']);
-        Route::get('/view-my-finance/{filter}', [Api\V1\MyFinanceController::class, 'show']);
+        Route::get('/view-my-finance/', [Api\V1\MyFinanceController::class, 'show']);
+    });
 
-
-        Route::get('/view-my-finance/', [Api\V1\MyFinanceController::class, 'index']);
-
-        
-        
+    Route::group(['prefix' => 'onboardinginfo'], function () {
+        Route::get('/', [Api\V1\UserOnboardingInfoController::class, 'index']);
+        Route::post('/', [Api\V1\UserOnboardingInfoController::class, 'store']);
+        Route::put('/', [Api\V1\UserOnboardingInfoController::class, 'update']);
+        Route::patch('/', [Api\V1\UserOnboardingInfoController::class, 'update']);
     });
 }); 
 
 
-Route::group(['prefix' => 'onboardinginfo'], function () {
-    Route::get('/', [Api\V1\OnboardingInfoController::class, 'index']);
-    Route::get('/{onboardinginfo}', [Api\V1\OnboardingInfoController::class, 'show']);
-    Route::post('/', [Api\V1\OnboardingInfoController::class, 'store']);
-    Route::put('/{onboardinginfo}', [Api\V1\OnboardingInfoController::class, 'update']);
-    Route::patch('/{onboardinginfo}', [Api\V1\OnboardingInfoController::class, 'update']);
-    Route::delete('/{onboardinginfo}', [Api\V1\OnboardingInfoController::class, 'destroy']);
-});
+
+
 
 Route::group(['prefix' => 'users'], function () {
     Route::get('/', [Api\V1\UserController::class, 'index']);

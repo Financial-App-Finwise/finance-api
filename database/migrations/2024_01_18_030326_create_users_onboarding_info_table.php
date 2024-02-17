@@ -13,18 +13,27 @@ return new class extends Migration
     {
         Schema::create('users_onboarding_info', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('userID');
-            $table->string('gender', 50);
-            $table->string('motivation', 50);
-            $table->string('financial_level', 50);
-            $table->string('financial_target', 50);
-            $table->string('target_duration', 50);
-            $table->boolean('know_how_to_save');
+            $table->unsignedBigInteger('userID')->nullable();
+            $table->string('gender')->nullable();
+            $table->integer('age')->nullable();
+            $table->string('marital_status')->nullable();
+            $table->string('life_stage')->nullable();
+            $table->decimal('daily_expense', 10, 2)->nullable();
+            $table->decimal('weekly_expense', 10, 2)->nullable();
+            $table->decimal('monthly_expense', 10, 2)->nullable();
+            $table->decimal('daily_income', 10, 2)->nullable();
+            $table->decimal('weekly_income', 10, 2)->nullable();
+            $table->decimal('monthly_income', 10, 2)->nullable();
+            $table->string('financial_goal', 100)->nullable();
+            $table->decimal('dream_amount', 10, 2)->nullable();
+            $table->date('envision_date')->nullable();
+        
             $table->timestamps();
-
+        
             // Foreign key constraint
             $table->foreign('userID')->references('id')->on('users');
         });
+         
     }
 
     /**
