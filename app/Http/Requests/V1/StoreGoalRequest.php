@@ -24,15 +24,15 @@ class StoreGoalRequest extends FormRequest
     public function rules(): array
     {
         return[
-            'userID' => 'required|exists:users,id',
+            //'userID' => 'required|exists:users,id',
             'name' => 'required',
             'amount' => 'required',
             'currentSave' => 'required',
-            'remainingSave' => 'required',
+            //'remainingSave' => 'sometimes',
             'setDate' => 'required',
-            'startDate' => 'sometimes|required',
-            'endDate' => 'sometimes|required',
-            'monthlyContribution' => 'sometimes|required',
+            'startDate' => 'sometimes',
+            'endDate' => 'sometimes',
+            'monthlyContribution' => 'sometimes',
             ];
     }
 }

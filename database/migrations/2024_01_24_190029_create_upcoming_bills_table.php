@@ -19,7 +19,8 @@ return new class extends Migration
             $table->dateTime('date');
             $table->string('name', 50)->nullable();
             $table->text('note')->nullable();
-            $table->timestamps();
+            $table->enum('status', ['paid', 'unpaid', 'overdue'])->default('unpaid'); 
+            $table->timestamps()    ;
 
             // Foreign key constraints
             $table->foreign('userID')->references('id')->on('users');

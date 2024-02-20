@@ -4,6 +4,7 @@ namespace App\Http\Requests\V1;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Log;
 
 
 
@@ -26,26 +27,28 @@ class UpdateGoalRequest extends FormRequest
     {
         $method = $this->method();
         if ($method == 'PUT') {
-            return[
+            return [
                 'name' => 'required',
-                'amount' => 'required||numeric',
+                'amount' => 'required|numeric',
                 'currentSave' => 'required|numeric',
-                'remainingSave' => 'required|numeric',
-                'setDate' => 'required',
-                'startDate' => 'required',
-                'endDate' => 'required',
-                'monthlyContribution' => 'required',
+                //'remainingSave' => 'sometimes|required|numeric',
+                'setDate' => 'required|boolean',
+                'startDate' => ($this->input('setDate') == 0) ? 'nullable' : 'sometimes|date',
+                'endDate' => ($this->input('setDate') == 0) ? 'nullable' : 'sometimes|date',
+                //'monthlyContribution' => 'sometimes|numeric',
+                'monthlyContribution' => ($this->input('setDate') == 0) ? 'sometimes|required|numeric' : 'nullable',
+
             ];
         } else {
-            return[
+            return [
                 'name' => 'sometimes|required',
                 'amount' => 'sometimes|required|numeric',
                 'currentSave' => 'sometimes|required|numeric',
-                'remainingSave' => 'sometimes|required|numeric',
-                'setDate' => 'sometimes|required',
-                'startDate' => 'sometimes|required',
-                'endDate' => 'sometimes|required',
-                'monthlyContribution' => 'sometimes|required',
+                //'remainingSave' => 'sometimes|required|numeric',
+                'setDate' => 'sometimes|required|boolean',
+                'startDate' => ($this->input('setDate') == 0) ? 'nullable' : 'sometimes|required|date',
+                'endDate' => ($this->input('setDate') == 0) ? 'nullable' : 'sometimes|required|date',
+                'monthlyContribution' => 'sometimes|numeric',
             ];
         }
     }

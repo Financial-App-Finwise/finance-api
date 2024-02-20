@@ -79,23 +79,41 @@ Route::group(['prefix' => 'categories'], function () {
     Route::delete('/{category}', [Api\V1\CategoryController::class, 'destroy']);
 });
 
-Route::group(['prefix' => 'upcomingbills'], function () {
-    Route::get('/', [Api\V1\UpcomingbillController::class, 'index']);
-    Route::get('/{upcomingbill}', [Api\V1\UpcomingbillController::class, 'show']);
-    Route::post('/', [Api\V1\UpcomingbillController::class, 'store']);
-    Route::put('/{upcomingbill}', [Api\V1\UpcomingbillController::class, 'update']);
-    Route::patch('/{upcomingbill}', [Api\V1\UpcomingbillController::class, 'update']);
-    Route::delete('/{upcomingbill}', [Api\V1\UpcomingbillController::class, 'destroy']);
-});
+Route::group([
+    'middleware' => ['auth:sanctum'],
+], function () {
+    Route::group(['prefix' => 'auth'], function () {
+        Route::post('/logout', [AuthController::class, 'logout']);
+        Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+    });
 
-Route::group(['prefix' => 'goals'], function () {
-    Route::get('/', [Api\V1\GoalController::class, 'index']);
-    Route::get('/{goal}', [Api\V1\GoalController::class, 'show']);
-    Route::post('/', [Api\V1\GoalController::class, 'store']);
-    Route::put('/{goal}', [Api\V1\GoalController::class, 'update']);
-    Route::patch('/{goal}', [Api\V1\GoalController::class, 'update']);
-    Route::delete('/{goal}', [Api\V1\GoalController::class, 'destroy']);
-});
+    Route::group(['prefix' => 'upcomingbills'], function () {
+        Route::get('/', [Api\V1\UpcomingbillController::class, 'index']);
+        Route::get('/{upcomingbill}', [Api\V1\UpcomingbillController::class, 'show']);
+        Route::post('/', [Api\V1\UpcomingbillController::class, 'store']);
+        Route::put('/{upcomingbill}', [Api\V1\UpcomingbillController::class, 'update']);
+        Route::patch('/{upcomingbill}', [Api\V1\UpcomingbillController::class, 'update']);
+        Route::delete('/{upcomingbill}', [Api\V1\UpcomingbillController::class, 'destroy']);
+    });
+}); 
+
+Route::group([
+    'middleware' => ['auth:sanctum'],
+], function () {
+    Route::group(['prefix' => 'auth'], function () {
+        Route::post('/logout', [AuthController::class, 'logout']);
+        Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+    });
+
+    Route::group(['prefix' => 'goals'], function () {
+        Route::get('/', [Api\V1\GoalController::class, 'index']);
+        Route::get('/{goal}', [Api\V1\GoalController::class, 'show']);
+        Route::post('/', [Api\V1\GoalController::class, 'store']);
+        Route::put('/{goal}', [Api\V1\GoalController::class, 'update']);
+        Route::patch('/{goal}', [Api\V1\GoalController::class, 'update']);
+        Route::delete('/{goal}', [Api\V1\GoalController::class, 'destroy']);
+    });
+}); 
 
 
 // Reject any random requests
