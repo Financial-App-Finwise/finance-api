@@ -5,25 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Transaction extends Model
+class TransactionGoal extends Model
 {
     use HasFactory;
-
     protected $fillable = [
         'userID',
-        'categoryID',
-        'isIncome',
-        'amount',
-        'hasContributed',
-        'upcomingbillID',
-        'budgetplanID',
-        'expenseType',
-        'date',
-        'note',
+        'transactionID',
+        'goalID',
+        'ContributionAmount',
     ];
 
     public function user(){
         return $this->belongsTo(User::class);
     }
 }
-
