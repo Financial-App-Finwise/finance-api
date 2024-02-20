@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Api\V1;
+
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -21,7 +22,7 @@ class UserController extends Controller
      * Display a listing of the resource.
      */
 
-     //test query
+    //test query
     public function index(Request $request)
     {
         $filter = new UserFilter();
@@ -34,19 +35,19 @@ class UserController extends Controller
 
         $user = User::where($filterItems);
 
-        if ($includeCategory){
+        if ($includeCategory) {
             $user = $user->with('categories');
         }
-        if ($includeUpcomingbill){
+        if ($includeUpcomingbill) {
             $user = $user->with('upcoming_bills');
         }
-        if ($includeGoal){
+        if ($includeGoal) {
             $user = $user->with('goals');
         }
         return new UserCollection($user->paginate()->appends($request->query()));
-            
-        }
-        //return new UserCollection(User::where($queryItems)->paginate());
+
+    }
+    //return new UserCollection(User::where($queryItems)->paginate());
 
     // public function index(){
     //     // Logic to get all users
@@ -59,6 +60,7 @@ class UserController extends Controller
     //     return new UserCollection(User::paginate());
 
     // }
+
     /**
      * Show the form for creating a new resource.
      */
@@ -84,24 +86,58 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        //include related data 
         $includeCategory = request()->query('includeCategory');
         $includeUpcomingbill = request()->query('includeUpcomingbill');
         $includeGoal = request()->query('includeGoal');
+        $loadData = [];
 
-        $user->loadMissing(['categories', 'upcoming_bills', 'goals']);
-        
         if ($includeCategory) {
-            return new UserResource($user);
+            $loadData[] = 'categories';
         }
         if ($includeUpcomingbill) {
-            return new UserResource($user);
+            $loadData[] = 'upcoming_bills';
         }
         if ($includeGoal) {
-            return new UserResource($user);
+            $loadData[] = 'goals';
         }
-        // Logic to get a specific user by ID
-        return response()->json($user);
+
+        $user->loadMissing($loadData);
+
+        // Filter goals based on startDate[gte] parameter
+
+        // if ($includeGoal && request()->has('startDate.gte')) {
+        //     $startDateGte = request()->input('startDate.gte');
+        //     $goals = $user->goals()->where('startDate', '>=', $startDateGte)->get();
+        //     $user->setRelation('goals', $goals);
+        // }
+
+        // Filter goals based on startDate[gte] parameter
+        if ($includeGoal && request()->has('startDate.gte')) {
+            $startDateGte = request()->input('startDate.gte');
+            //\Log::info('Goals Query: ' . $user->goals()->where('startDate', '>=', $startDateGte)->toSql());
+            $goals = $user->goals()->where('startDate', '>=', $startDateGte)->get();
+            $user->setRelation('goals', $goals);
+        }
+
+        // Initialize meta array
+        $meta = [];
+
+        // Count the number of categories if requested
+        if ($includeCategory) {
+            $meta['categoryCount'] = $user->categories->count();
+        }
+
+        // Count the number of goals if requested
+        if ($includeGoal) {
+            $meta['totalSmartGoal'] = $user->goals->count();
+        }
+        if ($includeUpcomingbill) {
+            $meta['totalUpcomingbill'] = $user->upcoming_bills->count();
+        }
+        // Return JSON response with user data and optionally category and goal counts
+        return (new UserResource($user))->additional([
+            'meta' => $meta,
+        ]);
     }
 
     /**
@@ -130,16 +166,4 @@ class UserController extends Controller
         $user->delete();
         return response()->json(['message' => 'User deleted successfully']);
     }
-    // public function destroy($id){
-    //     $user=User::find($id);
-    
-    //     $user->destroy();
-    
-    //     $data=[
-    //         'status' => 200,
-    //         'message' => "data deleted successfully"
-    //     ];
-    
-    //     return response()->json($data, 200);
-    // }
 }

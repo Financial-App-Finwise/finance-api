@@ -23,6 +23,7 @@ class UpcomingbillResource extends JsonResource
             'date' => $this->date->format('Y-m-d H:i:s'),
             'name' => $this->name,
             'note' => $this->note,
+            'status' => $this->status,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             ];

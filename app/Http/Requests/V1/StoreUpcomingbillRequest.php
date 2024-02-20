@@ -22,11 +22,11 @@ class StoreUpcomingbillRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'userID' => 'required|exists:users,id',
+            //'userID' => 'required|exists:users,id',
             'categoryID' => 'required',
             'amount' => 'required',
             'date' => 'required|date_format:Y-m-d H:i:s',
-            'name' => 'required',
+            'name' => 'sometimes',
             'note' => 'sometimes',
         ];
     }

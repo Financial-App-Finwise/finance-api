@@ -15,6 +15,8 @@ class UpcomingBillFilter extends ApiFilter{
         'date' => ['eq', 'lt', 'gt', 'lte', 'gte'],
         'name' => ['eq', 'ne'],
         'note' => ['eq', 'ne'],
+        'status' => ['eq'],
+
     ];
     protected $operatorMap = [
         'eq' => '=',
