@@ -41,8 +41,8 @@ Route::group([
     });
 
     Route::group(['prefix' => 'budgetplans'], function () {
-        Route::get('/{year}/{month}', [Api\V1\BudgetPlanController::class, 'index']);
         Route::get('/summary/{year}', [Api\V1\BudgetPlanController::class, 'show_summary']);
+        Route::get('/{year}/{month}', [Api\V1\BudgetPlanController::class, 'index']);
         Route::get('/{budgetplan}', [Api\V1\BudgetPlanController::class, 'show']);
         Route::post('/', [Api\V1\BudgetPlanController::class, 'store']);
         Route::delete('/{budgetplan}', [Api\V1\BudgetPlanController::class, 'destroy']);

@@ -28,18 +28,11 @@ class BudgetPlanController extends Controller
                         ->whereYear('created_at', $year)
                         ->whereMonth('created_at', $month)
                         ->orderBy('created_at', 'asc')
-                        ->get()
-                        ->groupBy(function($date) {
-                            return Carbon::parse($date->created_at)->format('m');
-                        });
+                        ->get();
+        
+        $totalBudgetPlans = $budgetPlans->count();
     
-        $formattedData = [];
-    
-        foreach ($budgetPlans as $key => $value) {
-            $formattedData[$this->getMonthName($key)] = $value->toArray();
-        }
-    
-        return response()->json(['success' => 'true', 'data' => $formattedData]);
+        return response()->json(['success' => 'true', 'total' => $totalBudgetPlans, 'data' => $budgetPlans]);
     }
     
     
@@ -70,7 +63,7 @@ class BudgetPlanController extends Controller
         # add user id to the request
         $request->merge(['userID' => $user->id]);
 
-        return response()->json(['success'=> 'true', 'data' => new BudgetPlanResource(BudgetPlan::create($request->all()))]);
+        return response()->json(['success'=> 'true', 'message' => 'Budget Plan created successfully', 'data' => new BudgetPlanResource(BudgetPlan::create($request->all()))]);
     }
 
     /**
@@ -79,7 +72,7 @@ class BudgetPlanController extends Controller
     public function show(BudgetPlan $budgetplan)
     {
         // Logic to get a specific budget plan by ID
-        return response()->json($budgetplan);
+        return response()->json(['success' => 'true', 'data' => $budgetplan]);
     }
         /**
      * Display the specified resource.
@@ -107,9 +100,7 @@ class BudgetPlanController extends Controller
         }
     
         return response()->json(['success' => 'true', 'data' => $formattedData]);
-    }
-    
-    
+    }    
     
 
     /**
@@ -126,8 +117,6 @@ class BudgetPlanController extends Controller
      */
     public function update(UpdateBudgetPlanRequest $request, BudgetPlan $budgetplan)
     {
-        // Validate the request using the UpdateBudgetPlanRequest class
-    
         // Check if the model is retrieved successfully
         if (!$budgetplan) {
             return response()->json(['success'=> 'false', 'message' => 'Budget Plan not found'], 404);
@@ -147,7 +136,11 @@ class BudgetPlanController extends Controller
             return response()->json(['success'=> 'false', 'message' => 'Failed to update Budget Plan'], 500);
         }
     
-        return response()->json(['success'=> 'true', 'message' => 'Budget Plan updated successfully']);
+        return response()->json([
+            'success' => 'true',
+            'message' => 'Budget Plan updated successfully',
+            'data' => $budgetplan->fresh()
+        ]);
     }
 
     /**
