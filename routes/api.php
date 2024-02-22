@@ -123,6 +123,23 @@ Route::group([
     });
 }); 
 
+Route::group([
+    'middleware' => ['auth:sanctum'],
+], function () {
+    Route::group(['prefix' => 'auth'], function () {
+        Route::post('/logout', [AuthController::class, 'logout']);
+        Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+    });
+
+    Route::group(['prefix' => 'transactions'], function () {
+        Route::get('/', [Api\V1\TransactionController::class, 'index']);
+        Route::get('/{transaction}', [Api\V1\TransactionController::class, 'show']);
+        Route::post('/', [Api\V1\TransactionController::class, 'store']);
+        Route::put('/{transaction}', [Api\V1\TransactionController::class, 'update']);
+        Route::patch('/{transaction}', [Api\V1\TransactionController::class, 'update']);
+        Route::delete('/{transaction}', [Api\V1\TransactionController::class, 'destroy']);
+    });
+}); 
 
 // Reject any random requests
 // Route::any('{any}', function () {
