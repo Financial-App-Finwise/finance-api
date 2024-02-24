@@ -270,17 +270,19 @@ class GoalController extends Controller
         if (!$goal) {
             return response()->json(['error' => 'Goal not found'], 404);
         }
-
         # add user id to the request
         $user = auth()->user();
         # check if the budget plan belongs to the user
         if ($goal->userID != $user->id) {
-            return response()->json(['success' => 'false', 'message' => 'You are not authorized to delete this Smart Goal'], 403);
+            return response()->json(['success' => 'false', 'message' => 'You are not authorized to update this Smart Goal'], 403);
         }
 
         // Logic to update a budget plan by ID
         try {
             $validatedData = $request->validated();
+
+            $validatedData['userID'] = $user->id;
+
             // Calculate remaining save
             $remainingSave = $validatedData['amount'] - $validatedData['currentSave'];
 
@@ -291,15 +293,28 @@ class GoalController extends Controller
             // Update the remainingSave field in the validated data
             $validatedData['remainingSave'] = $remainingSave;
 
+            // Check if currentSave is greater than amount
+            if ($remainingSave < 0) {
+                throw new \Exception('Current save cannot be greater than the goal amount.');
+            }
             // Additional validation logic
             if ($validatedData['setDate'] == 0) {
                 // Ensure that startDate and endDate are null or not present when setDate is 0
                 if (!isset($validatedData['startDate']) && !isset($validatedData['endDate'])) {
 
+                    // Validate monthly contribution
                     if (!isset($validatedData['monthlyContribution'])) {
                         throw new \Exception('Monthly contribution is required when set date is disabled.');
                     }
                     $goal->update(['startDate' => null, 'endDate' => null]); // Update startDate and endDate to null
+                    
+                    // Set startDate as currentDate
+                    $validatedData['startDate'] = Carbon::now()->toDateString();
+                    // Calculate endDate based on monthly contribution and remaining save
+                    $monthlyContribution = $validatedData['monthlyContribution'];
+                    $endDate = Carbon::now()->addMonths(ceil($remainingSave / $monthlyContribution))->toDateString();
+                    $validatedData['endDate'] = $endDate;
+
                 } elseif (isset($validatedData['startDate']) || isset($validatedData['endDate'])) {
                     throw new \Exception('Start date and end date must be null or not present when set date is disabled.');
                 }
@@ -324,21 +339,42 @@ class GoalController extends Controller
                     if ($startDate > $currentDate) {
                         // If start date is in the future, calculate remaining months from start date to end date
                         $remainingMonths = $startDate->diffInMonths($endDate);
+                        
+                        $remainingDays = $startDate->diffInDays($endDate) - ($remainingMonths * 30);
+                    
+                    } elseif ($startDate < $currentDate & $endDate < $currentDate) {
+
+                        $remainingMonths = $startDate->diffInMonths($endDate);
+
+                        $remainingDays = $startDate->diffInDays($endDate) - ($remainingMonths * 30);
+                    
                     } else {
+                        
                         // If start date is not provided or is in the past, calculate remaining months from current date to end date
                         $remainingMonths = $currentDate->diffInMonths($endDate);
+                        
+                        $remainingDays = $currentDate->diffInDays($endDate) - ($remainingMonths * 30);
+                    }
+
+                    if ($remainingDays > 15) {
+                        $remainingMonths++;
                     }
 
                     // Validate endDate
-                    if ($endDate <= $currentDate) {
-                        throw new \Exception('End date must be in the future.');
+                    if ($endDate <= $startDate) {
+                        throw new \Exception('End date must be after the start date.');
                     }
 
-                    // Calculate the monthly contribution needed to reach the target goal amount
-                    $monthlyContribution = $remainingMonths > 0 ? round($remainingSave / $remainingMonths, 2) : 0;
+                    // Handle scenario where remaining time is less than 1 month
+                    if ($remainingMonths == 0) {
+                        $validatedData['monthlyContribution'] = $remainingSave;
+                    } else {
+                        // Calculate the monthly contribution needed to reach the target goal amount
+                        $monthlyContribution = $remainingMonths > 0 ? round($remainingSave / $remainingMonths, 2) : 0;
+                        // Update the monthlyContribution field
+                        $validatedData['monthlyContribution'] = $monthlyContribution;
+                    }
 
-                    // Update the monthlyContribution field
-                    $validatedData['monthlyContribution'] = $monthlyContribution;
                 }
             }
             $goal->update($validatedData);
