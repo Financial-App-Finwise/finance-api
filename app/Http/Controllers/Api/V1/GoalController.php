@@ -41,6 +41,7 @@ class GoalController extends Controller
 
     //     }
     // }
+
     public function index(Request $request)
     {
         $user = auth()->user();
@@ -48,44 +49,39 @@ class GoalController extends Controller
         $filter = new GoalFilter();
         $queryItems = $filter->transform($request); //[['column', 'operator', 'value']]
 
-        if (count($queryItems) == 0) {
-            //return new GoalCollection(Goal::where('userID', $user->id)->paginate());
-            return new GoalCollection(Goal::where('userID', $user->id)->orderBy('created_at', 'desc')->paginate());
+        $query = Goal::where('userID', $user->id);
 
-        } else {
-            $query = Goal::where('userID', $user->id);
-
-            foreach ($queryItems as $item) {
-                $query->where($item[0], $item[1], $item[2]);
-            }
-            //$goals = $query->paginate();
-            $goals = $query->orderBy('created_at', 'desc')->paginate();
-            return new GoalCollection($goals->appends($request->query()));
+        // Apply filters from the query parameters
+        foreach ($queryItems as $item) {
+            $query->where($item[0], $item[1], $item[2]);
         }
+
+        // Filter by status if provided
+        $status = $request->get('status');
+        if ($status) {
+            if ($status === 'in Progress') {
+                $query->where('remainingSave', '>', 0)
+                    ->where('currentSave', '<', \DB::raw('amount'));
+            } elseif ($status === 'Achieved') {
+                $query->where('remainingSave', '=', 0)
+                    ->where('currentSave', '=', \DB::raw('amount'));
+            }
+        }
+        $goals = $query->orderBy('created_at', 'desc')->paginate();
+        return new GoalCollection($goals->appends($request->query()));
     }
 
-    // public function index(){
-    //     // Logic to get all goals
-    //     //return Goal::all(); 
-
-    //     //Logic to store data in collection
-    //     //return new GoalCollection(Goal::all());
-
-    //     //Logic to paginate the store data 
-    //     return new GoalCollection(Goal::paginate());
-
-    // }
     /**
      * Show the form for creating a new resource.
      */
 
-    public function create()
-    {
-        // Logic to get a specific user by ID
-        $goal = Goal::find($id);
-        return response()->json($goal);
-        //return $goal = Goal::find($id);
-    }
+    // public function create()
+    // {
+    //     // Logic to get a specific user by ID
+    //     $goal = Goal::find($id);
+    //     return response()->json($goal);
+    //     //return $goal = Goal::find($id);
+    // }
 
     /**
      * Store a newly created resource in storage.
@@ -128,9 +124,17 @@ class GoalController extends Controller
                 // Ensure that startDate and endDate are null or not present when setDate is 0
                 if (!isset($validatedData['startDate']) && !isset($validatedData['endDate'])) {
 
+                    // Validate monthly contribution
                     if (!isset($validatedData['monthlyContribution'])) {
                         throw new \Exception('Monthly contribution is required when set date is disabled.');
                     }
+                    // Set startDate as currentDate
+                    $validatedData['startDate'] = Carbon::now()->toDateString();
+                    // Calculate endDate based on monthly contribution and remaining save
+                    $monthlyContribution = $validatedData['monthlyContribution'];
+                    $endDate = Carbon::now()->addMonths(ceil($remainingSave / $monthlyContribution))->toDateString();
+                    $validatedData['endDate'] = $endDate;
+
                     //$goal->update(['startDate' => null, 'endDate' => null]); // Update startDate and endDate to null
                 } elseif (isset($validatedData['startDate']) || isset($validatedData['endDate'])) {
                     throw new \Exception('Start date and end date must be null or not present when set date is disabled.');
@@ -157,21 +161,40 @@ class GoalController extends Controller
                     if ($startDate > $currentDate) {
                         // If start date is in the future, calculate remaining months from start date to end date
                         $remainingMonths = $startDate->diffInMonths($endDate);
+
+                        $remainingDays = $startDate->diffInDays($endDate) - ($remainingMonths * 30);
+
+                    } elseif ($startDate < $currentDate & $endDate < $currentDate) {
+
+                        $remainingMonths = $startDate->diffInMonths($endDate);
+
+                        $remainingDays = $startDate->diffInDays($endDate) - ($remainingMonths * 30);
+
                     } else {
                         // If start date is not provided or is in the past, calculate remaining months from current date to end date
                         $remainingMonths = $currentDate->diffInMonths($endDate);
+
+                        $remainingDays = $currentDate->diffInDays($endDate) - ($remainingMonths * 30);
+                    }
+
+                    if ($remainingDays > 15) {
+                        $remainingMonths++;
                     }
 
                     // Validate endDate
-                    if ($endDate <= $currentDate) {
-                        throw new \Exception('End date must be in the future.');
+                    if ($endDate <= $startDate) {
+                        throw new \Exception('End date must be after the start date.');
                     }
 
-                    // Calculate the monthly contribution needed to reach the target goal amount
-                    $monthlyContribution = $remainingMonths > 0 ? round($remainingSave / $remainingMonths, 2) : 0;
-
-                    // Update the monthlyContribution field
-                    $validatedData['monthlyContribution'] = $monthlyContribution;
+                    // Handle scenario where remaining time is less than 1 month
+                    if ($remainingMonths == 0) {
+                        $validatedData['monthlyContribution'] = $remainingSave;
+                    } else {
+                        // Calculate the monthly contribution needed to reach the target goal amount
+                        $monthlyContribution = $remainingMonths > 0 ? round($remainingSave / $remainingMonths, 2) : 0;
+                        // Update the monthlyContribution field
+                        $validatedData['monthlyContribution'] = $monthlyContribution;
+                    }
                 }
             }
 
