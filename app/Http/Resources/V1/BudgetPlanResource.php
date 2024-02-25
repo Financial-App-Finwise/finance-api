@@ -22,6 +22,9 @@ class BudgetPlanResource extends JsonResource
             'isMonthly' => $this->isMonthly,
             'name' => $this->name,
             'amount' => $this->amount,
+            'date' => $this->date,
+            'isRecurring' => $this->isRecurring,
+            'transaction' => new TransactionResource($this->whenLoaded('transaction')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

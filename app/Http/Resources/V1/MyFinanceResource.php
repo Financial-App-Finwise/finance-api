@@ -19,8 +19,8 @@ class MyFinanceResource extends JsonResource
             'userID' => $this->userID,
             'totalbalance' => $this->totalbalance,
             'currency' => new CurrencyResource($this->whenLoaded('currency')),
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            // 'created_at' => $this->created_at,
+            // 'updated_at' => $this->updated_at,
         ];
     }
 }

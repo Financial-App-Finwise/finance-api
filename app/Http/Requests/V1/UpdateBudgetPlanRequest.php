@@ -27,6 +27,8 @@ class UpdateBudgetPlanRequest extends FormRequest
             'isMonthly' => 'required|in:0,1',
             'name' => 'sometimes|required|string|max:50',
             'amount' => 'sometimes|required|numeric|min:0',
+            'date' => 'sometimes|required|date',
+            'isRecurring' => 'sometimes|in:0,1',
         ];
     }
 }

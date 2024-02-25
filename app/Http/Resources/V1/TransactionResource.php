@@ -19,6 +19,7 @@ class TransactionResource extends JsonResource
             'id' => $this->id,
             'userID' => $this->userID,
             'categoryID' => $this->categoryID,
+            'category' => new CategoryResource($this->whenLoaded('category')),
             'isIncome' => $this->isIncome,
             'amount' => $this->amount,
             'hasContributed' => $this->hasContributed,
