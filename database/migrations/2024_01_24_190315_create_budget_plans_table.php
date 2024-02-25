@@ -16,8 +16,10 @@ return new class extends Migration
             $table->unsignedBigInteger('userID'); 
             $table->unsignedBigInteger('categoryID'); 
             $table->tinyInteger('isMonthly')->default(0); // Default  0 means one-time budget and 1 means monthly-budget
-            $table->string('name', 50); 
+            $table->string('name', 50);
             $table->decimal('amount', 10, 2)->default(0);
+            $table->date('date');
+            $table->tinyInteger('isRecurring')->default(0);
             $table->timestamps();
 
             // Foreign key constraints

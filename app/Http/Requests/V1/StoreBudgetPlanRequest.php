@@ -24,9 +24,11 @@ class StoreBudgetPlanRequest extends FormRequest
         return [
             //
             'categoryID' => 'required|exists:categories,id',
-            'isMonthly' => 'required|in:0,1',
+            'isMonthly' => 'sometimes|in:0,1',
             'name' => 'required|string|max:50',
             'amount' => 'required|numeric|min:0',
+            'date' => 'required|date',
+            'isRecurring' => 'sometimes|in:0,1',
         ];
     }
 }

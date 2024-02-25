@@ -50,11 +50,12 @@ Route::group([
         Route::patch('/{budgetplan}', [Api\V1\BudgetPlanController::class, 'update']);
     });
     Route::group(['prefix' => 'myfinances'], function () {
+        Route::get('/view-my-finance/', [Api\V1\MyFinanceController::class, 'show']);
         Route::post('/', [Api\V1\MyFinanceController::class, 'create']);
         Route::get('/currency', [Api\V1\MyFinanceController::class, 'show_currency']);
         Route::put('/update-net-worth', [Api\V1\MyFinanceController::class, 'update']);
         Route::patch('/update-net-worth', [Api\V1\MyFinanceController::class, 'update']);
-        Route::get('/view-my-finance/', [Api\V1\MyFinanceController::class, 'show']);
+        
     });
 
     Route::group(['prefix' => 'onboardinginfo'], function () {
@@ -64,8 +65,6 @@ Route::group([
         Route::patch('/', [Api\V1\UserOnboardingInfoController::class, 'update']);
     });
 }); 
-
-
 
 
 
@@ -90,11 +89,6 @@ Route::group(['prefix' => 'categories'], function () {
 Route::group([
     'middleware' => ['auth:sanctum'],
 ], function () {
-    Route::group(['prefix' => 'auth'], function () {
-        Route::post('/logout', [AuthController::class, 'logout']);
-        Route::post('/reset-password', [AuthController::class, 'resetPassword']);
-    });
-
     Route::group(['prefix' => 'upcomingbills'], function () {
         Route::get('/', [Api\V1\UpcomingbillController::class, 'index']);
         Route::get('/{upcomingbill}', [Api\V1\UpcomingbillController::class, 'show']);
@@ -102,15 +96,6 @@ Route::group([
         Route::put('/{upcomingbill}', [Api\V1\UpcomingbillController::class, 'update']);
         Route::patch('/{upcomingbill}', [Api\V1\UpcomingbillController::class, 'update']);
         Route::delete('/{upcomingbill}', [Api\V1\UpcomingbillController::class, 'destroy']);
-    });
-}); 
-
-Route::group([
-    'middleware' => ['auth:sanctum'],
-], function () {
-    Route::group(['prefix' => 'auth'], function () {
-        Route::post('/logout', [AuthController::class, 'logout']);
-        Route::post('/reset-password', [AuthController::class, 'resetPassword']);
     });
 
     Route::group(['prefix' => 'goals'], function () {
@@ -120,15 +105,6 @@ Route::group([
         Route::put('/{goal}', [Api\V1\GoalController::class, 'update']);
         Route::patch('/{goal}', [Api\V1\GoalController::class, 'update']);
         Route::delete('/{goal}', [Api\V1\GoalController::class, 'destroy']);
-    });
-}); 
-
-Route::group([
-    'middleware' => ['auth:sanctum'],
-], function () {
-    Route::group(['prefix' => 'auth'], function () {
-        Route::post('/logout', [AuthController::class, 'logout']);
-        Route::post('/reset-password', [AuthController::class, 'resetPassword']);
     });
 
     Route::group(['prefix' => 'transactions'], function () {

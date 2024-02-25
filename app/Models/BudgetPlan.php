@@ -15,10 +15,17 @@ class BudgetPlan extends Model
         'isMonthly',
         'name',
         'amount',
+        'date',
+        'isRecurring'
     ];
 
     public function user(){
         return $this->belongsTo(User::class);
     }
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class, 'budgetplanID');
+    }
+
 }
 

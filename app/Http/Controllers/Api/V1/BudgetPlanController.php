@@ -8,6 +8,7 @@ use App\Http\Requests\V1\StoreBudgetPlanRequest;
 use App\Http\Requests\V1\UpdateBudgetPlanRequest;
 
 use App\Models\BudgetPlan;
+use App\Models\Transaction;
 use App\Http\Resources\V1\BudgetPlanResource;
 use App\Http\Resources\V1\BudgetPlanCollection;
 use Carbon\Carbon;
@@ -22,18 +23,54 @@ class BudgetPlanController extends Controller
     {
         // get user id
         $user = auth()->user();
+
+        $isMonthlyFilter = request('is_monthly', null);
+
+        $budgetPlansQuery = BudgetPlan::with('transactions')
+            ->where('userID', $user->id)
+            ->whereYear('date', $year)
+            ->whereMonth('date', $month);
     
-        // retrieve budget plans for a specific year and month, and group by month
-        $budgetPlans = BudgetPlan::where('userID', $user->id)
-                        ->whereYear('created_at', $year)
-                        ->whereMonth('created_at', $month)
-                        ->orderBy('created_at', 'asc')
-                        ->get();
-        
+        if ($isMonthlyFilter !== null) {
+            $budgetPlansQuery->where('isMonthly', $isMonthlyFilter);
+        }
+    
+        $budgetPlans = $budgetPlansQuery->orderBy('date', 'asc')->get();
+    
         $totalBudgetPlans = $budgetPlans->count();
+        $plannedBudgets = $budgetPlans->sum('amount');
     
-        return response()->json(['success' => 'true', 'total' => $totalBudgetPlans, 'data' => $budgetPlans]);
+        $budgetPlansWithCount = $budgetPlans->map(function ($budgetPlan) {
+            $budgetPlan['transactions_count'] = $budgetPlan->transactions->count();
+            $budgetPlan['total_transactions_amount'] = $budgetPlan->transactions->sum('amount');
+            $budgetPlan['remaining_amount'] = $budgetPlan->amount - $budgetPlan['total_transaction_amount'];
+            unset($budgetPlan['transactions']); // Remove the transactions data
+            return $budgetPlan;
+        });
+    
+        $spent = Transaction::where('userID', $user->id)
+            ->whereNotNull('budgetplanID')
+            ->sum('amount');
+    
+        $available = $plannedBudgets - $spent;
+        $overBudget = ($spent > $plannedBudgets) ? $spent - $plannedBudgets : 0;
+
+        return response()->json([
+            'success' => 'true',
+            'data' => [
+                'total_budgets' => $totalBudgetPlans,
+                'available' => $available,
+                'spent' => $spent,
+                'planned_budgets' => $plannedBudgets,
+                'over_budget' => $overBudget,
+                'budget_plans' => $budgetPlansWithCount
+            ],
+        ]);
+        
     }
+    
+    
+    
     
     
     private function getMonthName($monthNumber)
@@ -71,9 +108,60 @@ class BudgetPlanController extends Controller
      */
     public function show(BudgetPlan $budgetplan)
     {
-        // Logic to get a specific budget plan by ID
+        $filter = request('filter', null);
+
+        // Load transactions relationship and apply sorting based on the request
+        $transactions = $budgetplan->transactions();
+
+        switch ($filter) {
+            case 'recently':
+                $transactions = $transactions->orderByDesc('date');
+                break;
+            case 'earliest':
+                $transactions = $transactions->orderBy('date');
+                break;
+            case 'lowest':
+                $transactions = $transactions->orderBy('amount');
+                break;
+            case 'highest':
+                $transactions = $transactions->orderByDesc('amount');
+                break;
+            // 'all' or unknown filters will include all transactions
+            default:
+                break;
+        }
+
+        // Now, retrieve the sorted transactions
+        $sortedTransactions = $transactions->get();
+
+        // Group transactions with the same date into an array
+        $groupedTransactions = $sortedTransactions->groupBy(function ($transaction) {
+            // Format the date to only include the date portion
+            $formattedDate = \Carbon\Carbon::parse($transaction->date)->toDateString();
+
+            // Determine if it's today, yesterday, or another day
+            if ($formattedDate === \Carbon\Carbon::now()->toDateString()) {
+                return 'today';
+            } elseif ($formattedDate === \Carbon\Carbon::yesterday()->toDateString()) {
+                return 'yesterday';
+            } else {
+                return $formattedDate;
+            }
+        });
+
+        $budgetplan['transactions'] = $groupedTransactions;
+
+        $budgetplan['transactions_count'] = $sortedTransactions->count();
+        $budgetplan['total_transactiosn_amount'] = $sortedTransactions->sum('amount');
+        $budgetplan['remaining_amount'] = $budgetplan->amount - $budgetplan['total_transaction_amount'];
+
         return response()->json(['success' => 'true', 'data' => $budgetplan]);
     }
+
+    
+    
+    
+    
         /**
      * Display the specified resource.
      */
