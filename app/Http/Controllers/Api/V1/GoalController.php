@@ -67,9 +67,46 @@ class GoalController extends Controller
                     ->where('currentSave', '=', \DB::raw('amount'));
             }
         }
+
+        // Filter by year and group by month only if year is provided
+        $year = $request->get('year');
+        $month = $request->get('month');
+        if ($year) {
+            $startDate = Carbon::createFromFormat('Y', $year)->startOfYear();
+            $endDate = Carbon::createFromFormat('Y', $year)->endOfYear();
+            $query->whereBetween('endDate', [$startDate, $endDate]);
+
+            // Group goals by month
+            $goalsByMonth = $query->get()->groupBy(function ($goal) {
+                return Carbon::parse($goal->endDate)->format('F'); // Group by month name
+            });
+
+            // If a specific month is requested, return goals for that month and the total count
+            if ($month) {
+                $goalsForMonth = $goalsByMonth->get($month, collect());
+                return [
+                    'Total SMART Goal' => $goalsForMonth->count(),
+                    'goals' => $goalsForMonth,
+                ];
+            }
+
+            // If no specific month is requested, return the count of goals for each month in the year
+            $months = collect();
+            for ($i = 1; $i <= 12; $i++) {
+                $monthName = Carbon::createFromFormat('m', $i)->format('F');
+                $goalsForMonth = $goalsByMonth->get($monthName, collect()); // Use month name to fetch goals
+                $months->put($monthName, ['Number of goals'=>$goalsForMonth->count()]); // Put count of goals for the month
+            }
+
+            return $months;
+        }
+
+        // Fetch paginated goals if year is not provided
         $goals = $query->orderBy('created_at', 'desc')->paginate();
         return new GoalCollection($goals->appends($request->query()));
     }
+
+
 
     /**
      * Show the form for creating a new resource.
@@ -307,7 +344,7 @@ class GoalController extends Controller
                         throw new \Exception('Monthly contribution is required when set date is disabled.');
                     }
                     $goal->update(['startDate' => null, 'endDate' => null]); // Update startDate and endDate to null
-                    
+
                     // Set startDate as currentDate
                     $validatedData['startDate'] = Carbon::now()->toDateString();
                     // Calculate endDate based on monthly contribution and remaining save
@@ -339,20 +376,20 @@ class GoalController extends Controller
                     if ($startDate > $currentDate) {
                         // If start date is in the future, calculate remaining months from start date to end date
                         $remainingMonths = $startDate->diffInMonths($endDate);
-                        
+
                         $remainingDays = $startDate->diffInDays($endDate) - ($remainingMonths * 30);
-                    
+
                     } elseif ($startDate < $currentDate & $endDate < $currentDate) {
 
                         $remainingMonths = $startDate->diffInMonths($endDate);
 
                         $remainingDays = $startDate->diffInDays($endDate) - ($remainingMonths * 30);
-                    
+
                     } else {
-                        
+
                         // If start date is not provided or is in the past, calculate remaining months from current date to end date
                         $remainingMonths = $currentDate->diffInMonths($endDate);
-                        
+
                         $remainingDays = $currentDate->diffInDays($endDate) - ($remainingMonths * 30);
                     }
 
