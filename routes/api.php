@@ -55,7 +55,6 @@ Route::group([
         Route::get('/currency', [Api\V1\MyFinanceController::class, 'show_currency']);
         Route::put('/update-net-worth', [Api\V1\MyFinanceController::class, 'update']);
         Route::patch('/update-net-worth', [Api\V1\MyFinanceController::class, 'update']);
-        
     });
 
     Route::group(['prefix' => 'onboardinginfo'], function () {

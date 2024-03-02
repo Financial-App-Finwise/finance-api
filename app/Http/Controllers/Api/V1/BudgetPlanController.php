@@ -42,8 +42,8 @@ class BudgetPlanController extends Controller
     
         $budgetPlansWithCount = $budgetPlans->map(function ($budgetPlan) {
             $budgetPlan['transactions_count'] = $budgetPlan->transactions->count();
-            $budgetPlan['total_transactions_amount'] = $budgetPlan->transactions->sum('amount');
-            $budgetPlan['remaining_amount'] = $budgetPlan->amount - $budgetPlan['total_transaction_amount'];
+            $budgetPlan['spent'] = $budgetPlan->transactions->sum('amount');
+            $budgetPlan['remaining_amount'] = $budgetPlan->amount - $budgetPlan['spent'];
             unset($budgetPlan['transactions']); // Remove the transactions data
             return $budgetPlan;
         });
@@ -152,8 +152,8 @@ class BudgetPlanController extends Controller
         $budgetplan['transactions'] = $groupedTransactions;
 
         $budgetplan['transactions_count'] = $sortedTransactions->count();
-        $budgetplan['total_transactiosn_amount'] = $sortedTransactions->sum('amount');
-        $budgetplan['remaining_amount'] = $budgetplan->amount - $budgetplan['total_transaction_amount'];
+        $budgetplan['spent'] = $sortedTransactions->sum('amount');
+        $budgetplan['remaining_amount'] = $budgetplan->amount - $budgetplan['spent'];
 
         return response()->json(['success' => 'true', 'data' => $budgetplan]);
     }
