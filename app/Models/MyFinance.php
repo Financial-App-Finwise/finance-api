@@ -10,6 +10,7 @@ class MyFinance extends Model
     use HasFactory;
 
     protected $fillable = [
+        'sessionID',
         'userID',
         'totalbalance',
         'currencyID',

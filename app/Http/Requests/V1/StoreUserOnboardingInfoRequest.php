@@ -14,11 +14,14 @@ class StoreUserOnboardingInfoRequest extends FormRequest
     public function rules()
     {
         return [
+            'sessionID' => 'uuid',
             'userID' => 'exists:users,id',
             'gender' => 'string|max:50',
             'age' => 'integer',
             'marital_status' => 'string|max:50',
             'life_stage' => 'string|max:50',
+            'net_worth' => 'numeric',
+            'currencyID' => 'required|exists:currencies,id',
             'daily_expense' => 'numeric',
             'weekly_expense' => 'numeric',
             'monthly_expense' => 'numeric',

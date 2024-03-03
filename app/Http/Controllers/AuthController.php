@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Str;
+use App\Models\MyFinance;
+use App\Models\UserOnboardingInfo;
 
 
 class AuthController extends Controller
@@ -22,6 +24,7 @@ class AuthController extends Controller
             'name' => 'required|string|between:2,100',
             'email' => 'required|string|email|max:100|unique:users',
             'password' => 'required|string|confirmed|min:8',
+            'sessionID' => 'nullable|string',
         ], [
             'email.required' => "email_required",
             'email.unique' => "email_taken",
@@ -43,6 +46,15 @@ class AuthController extends Controller
                 'email_verification_code' => $code,
             ]
         ));
+
+
+        // Access sessionID from the request data
+        $sessionID = $request->input('sessionID');
+
+        if (!empty($sessionID)) {
+            MyFinance::where('sessionID', $sessionID)->update(['userID' => $user->id, 'sessionID' => null]);
+            UserOnboardingInfo::where('sessionID', $sessionID)->update(['userID' => $user->id, 'sessionID' => null]);
+        }  
 
         $data['code'] = $code;
         $data['email'] = $request->email;

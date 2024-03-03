@@ -17,6 +17,7 @@ class UserOnboardingInfoResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'sessionID' => $this->sessionID,
             'userID' => $this->userID,
             'gender' => $this->gender,
             'age' => $this->age,

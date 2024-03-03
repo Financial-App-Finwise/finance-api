@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('onboardingID');
             $table->unsignedBigInteger('categoryID');
+            $table->decimal('amount', 10, 2)->default(0);
             $table->timestamps();
 
             // Foreign key constraints

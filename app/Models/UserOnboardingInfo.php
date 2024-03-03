@@ -11,6 +11,7 @@ class UserOnboardingInfo extends Model
     protected $table = 'users_onboarding_info';
 
     protected $fillable = [
+        'sessionID',
         'userID',
         'gender',
         'age',
