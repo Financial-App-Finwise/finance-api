@@ -85,25 +85,27 @@ class MyFinanceController extends Controller
                         'total_expense' => $weekTransactions->where('isIncome', false)->sum('amount'),
                     ];
                 });
-        } elseif ($periodFilter === 'last_3_months') {
+            } else {
+                $subMonths = ($periodFilter === 'last_3_months') ? 2 : 4;
 
-        
-            // Calculate the start and end dates for the specified period
-            $startOfMonth = now()->subMonths(3)->startOfMonth();
-            $endOfMonth = now()->endOfMonth()->subMonth();
-        
-            $totals = $transactions
-                ->whereBetween('date', [$startOfMonth, $endOfMonth])
-                ->groupBy(function ($transaction) {
-                    return Carbon::parse($transaction->date)->format('Y-m');
-                })
-                ->map(function ($monthTransactions) {
-                    return [
-                        'total_income' => $monthTransactions->where('isIncome', true)->sum('amount'),
-                        'total_expense' => $monthTransactions->where('isIncome', false)->sum('amount'),
-                    ];
-                });
-        }
+                // Calculate the start and end dates for the specified period
+                $startOfMonth = now()->subMonths($subMonths)->startOfMonth(); // Start from two months ago
+                $endOfMonth = now()->addMonth()->endOfMonth(); // One month ahead
+                
+                $totals = $transactions
+                    ->whereBetween('date', [$startOfMonth, $endOfMonth])
+                    ->groupBy(function ($transaction) {
+                        return Carbon::parse($transaction->date)->format('Y-m');
+                    })
+                    ->map(function ($monthTransactions) {
+                        return [
+                            'total_income' => $monthTransactions->where('isIncome', true)->sum('amount'),
+                            'total_expense' => $monthTransactions->where('isIncome', false)->sum('amount'),
+                        ];
+                    });
+            }
+            
+              
 
         ////////Count all expenses and income
         $totalExpenses = $transactions->where('isIncome', 0)->sum('amount');
@@ -115,7 +117,7 @@ class MyFinanceController extends Controller
         }
 
         ////////Donut Chart
-        $summedTransactions = collect($transactions)->groupBy('note')->map(function ($group) {
+        $topTransactions = collect($transactions)->groupBy('note')->map(function ($group) {
             return [
                 'note' => $group[0]->note,
                 'amount' => $group->sum('amount'),
@@ -126,24 +128,25 @@ class MyFinanceController extends Controller
         $groupedTransactions = collect($transactions)->groupBy(function ($transaction) {
             return Carbon::parse($transaction->date)->startOfDay()->format('Y-m-d');
         });
-
+        
         $today = Carbon::today()->format('Y-m-d');
         $yesterday = Carbon::yesterday()->format('Y-m-d');
-
-        $organizedTransactions = [
-            'today' => $groupedTransactions->get($today, []),
-            'yesterday' => $groupedTransactions->get($yesterday, []),
+        
+        $allTransactions = [
+            'today' => collect($groupedTransactions->get($today, []))->take(2)->all(),
+            'yesterday' => collect($groupedTransactions->get($yesterday, []))->take(2)->all(),
         ];
+        
 
         return response()->json([
             'success' => 'true',
             'data' => [
-                'finance' => MyFinanceResource::collection($myfinance),
+                'finance' => $myfinance,
+                'totals' => $totals,
                 'total_expenses' => $totalExpenses,
                 'total_incomes' => $totalIncome,
-                'top_transaction' => $summedTransactions,
-                'all_transaction' => $organizedTransactions,
-                'totals' => $totals
+                'top_transactions' => $topTransactions,
+                'all_transactions' => $allTransactions
             ],
         ]);
     }
