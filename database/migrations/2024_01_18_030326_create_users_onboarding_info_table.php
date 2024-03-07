@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('users_onboarding_info', function (Blueprint $table) {
             $table->id();
+            $table->uuid('sessionID')->nullable();
             $table->unsignedBigInteger('userID')->nullable();
             $table->string('gender')->nullable();
             $table->integer('age')->nullable();

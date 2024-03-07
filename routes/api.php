@@ -32,6 +32,11 @@ Route::group(['prefix' => 'auth'], function () {
     Route::post('/forgot-password-reset', [AuthController::class, 'forgotPasswordReset']);
 });
 
+Route::group(['prefix' => 'onboardinginfo'], function () {
+    Route::post('/store', [Api\V1\UserOnboardingInfoController::class, 'store']);
+});
+
+
 Route::group([
     'middleware' => ['auth:sanctum'],
 ], function () {
@@ -59,7 +64,7 @@ Route::group([
 
     Route::group(['prefix' => 'onboardinginfo'], function () {
         Route::get('/', [Api\V1\UserOnboardingInfoController::class, 'index']);
-        Route::post('/', [Api\V1\UserOnboardingInfoController::class, 'store']);
+        Route::post('/create', [Api\V1\UserOnboardingInfoController::class, 'create']);
         Route::put('/', [Api\V1\UserOnboardingInfoController::class, 'update']);
         Route::patch('/', [Api\V1\UserOnboardingInfoController::class, 'update']);
     });

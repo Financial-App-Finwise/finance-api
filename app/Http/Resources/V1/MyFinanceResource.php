@@ -16,6 +16,7 @@ class MyFinanceResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'sessionID' => $this->sessionID,
             'userID' => $this->userID,
             'totalbalance' => $this->totalbalance,
             'currency' => new CurrencyResource($this->whenLoaded('currency')),

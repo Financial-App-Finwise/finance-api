@@ -24,11 +24,13 @@ class UpdateMyFinanceRequest extends FormRequest
         $method = $this->method();
         if ($method == 'PUT') {
             return [
+                'sessionID' => 'sometimes|uuid',
                 'totalbalance' => 'required|numeric|min:0',
                 'currencyID' => 'sometimes|exists:currencies,id',
             ];
         } else {
             return [
+                'sessionID' => 'sometimes|uuid',
                 'totalbalance' => 'sometimes|required|numeric|min:0',
                 'currencyID' => 'sometimes|required|exists:currencies,id',
             ];

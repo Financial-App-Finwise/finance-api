@@ -12,6 +12,7 @@ class OnboardingExpenseCategory extends Model
     protected $fillable = [
         'onboardingID',
         'categoryID',
+        'amount'
     ];
 
     public function onboarding()
