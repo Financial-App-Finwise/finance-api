@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('userID');
+            $table->unsignedBigInteger('userID')->nullable();
             $table->string('name', 50);
             $table->tinyInteger('isIncome')->default(0); // Default type to 0 for expense and 1 for income
             $table->unsignedBigInteger('parentID')->nullable(); // Nullable parentID for child categories

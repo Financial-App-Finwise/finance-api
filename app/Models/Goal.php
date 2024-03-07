@@ -19,17 +19,12 @@ class Goal extends Model
         'startDate',
         'endDate',
         'monthlyContribution',
-        'created_at',
-        'updated_at',
     ];
     
     public function user(){
         return $this->belongsTo(User::class);
     }
-    public function goal(){
-        return $this->belongsTo(Goal::class);
-    }
-    public function transactiongoal(){
-        return $this->hasMany(TransactionGoal::class);
+    public function UpcomingBill(){
+        return $this->belongsTo(UpcomingBill::class);
     }
 }

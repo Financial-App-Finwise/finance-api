@@ -9,7 +9,7 @@ use App\Filters\ApiFilter;
 class UpcomingBillFilter extends ApiFilter{
 
     protected $allowedParms = [
-        'userID' => ['eq'],
+        //'userID' => ['eq'],
         'categoryID' => ['eq'],
         'amount' => ['eq', 'lt', 'gt', 'lte', 'gte'],
         'date' => ['eq', 'lt', 'gt', 'lte', 'gte'],

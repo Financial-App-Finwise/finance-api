@@ -25,21 +25,15 @@ class UpdateCategoryRequest extends FormRequest
         $method = $this->method();
         if ($method == 'PUT') {
             return [
-                //'userID' => 'required|exists:users,id',
                 'name' => 'required',
                 'isIncome' => 'required',
                 'parentID' => 'required',
-                'level' => 'required',
-                'isOnboarding' => 'required',
             ];
         } else {
             return [
-                //'userID' => 'required|exists:users,id',
                 'name' => 'sometimes|required',
                 'isIncome' => 'sometimes|required',
                 'parentID' => 'sometimes|required',
-                'level' => 'sometimes|required',
-                'isOnboarding' => 'sometimes|required',
             ];
         }
     }

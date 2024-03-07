@@ -13,12 +13,32 @@ use App\Http\Resources\V1\UpcomingbillResource;
 use App\Http\Resources\V1\UpcomingbillCollection;
 
 use App\Filters\V1\UpcomingBillFilter;
+use Carbon\Carbon;
+
 
 class UpcomingbillController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
+    // public function index(Request $request)
+    // {
+    //     $user = auth()->user();
+    //     $upcomingbill = UpcomingBill::where('userID', $user->id);
+    //     $filter = new UpcomingBillFilter();
+    //     $queryItems = $filter->transform($request); //[['column', 'operator', 'value']]
+
+    //     if (count($queryItems) == 0){
+    //         return new UpcomingbillCollection(UpcomingBill::paginate());
+    //     } else{ 
+
+    //         $upcomingbill = UpcomingBill::where($queryItems)->paginate();
+
+    //         return new UpcomingbillCollection($upcomingbill->appends($request->query()));
+    //     }
+    // }
+    //$upcomingbill = UpcomingBill::where($queryItems)->paginate();
+
 
     public function index(Request $request)
     {
@@ -27,39 +47,70 @@ class UpcomingbillController extends Controller
         $filter = new UpcomingBillFilter();
         $queryItems = $filter->transform($request); //[['column', 'operator', 'value']]
 
-        if (count($queryItems) == 0) {
-            return new UpcomingbillCollection(UpcomingBill::where('userID', $user->id)->orderBy('date', 'desc')->paginate());
-        } else {
-            $query = UpcomingBill::where('userID', $user->id);
+        $query = UpcomingBill::where('userID', $user->id);
 
-            foreach ($queryItems as $item) {
-                $query->where($item[0], $item[1], $item[2]);
+        // Apply filters from the query parameters
+        foreach ($queryItems as $item) {
+            $query->where($item[0], $item[1], $item[2]);
+        }
+        // Filter by specific month and year if provided
+        $month = $request->input('month');
+        $year = $request->input('year');
+        if ($month && $year) {
+            $query->whereMonth('date', '=', date('m', strtotime($month)))
+                ->whereYear('date', '=', $year);
+        }
+        // Filter by status (paid and unpaid)
+        $status = $request->input('status');
+        if ($status) {
+            $query->where('status', $status);
+        }
+        // Sort by date
+        $dateSort = $request->input('date');
+        if ($dateSort === 'desc') {
+            $query->orderBy('date', 'desc');
+        } else {
+            $query->orderBy('date', 'asc');
+        }
+
+        //Filter group by Year->Month
+        $year = $request->get('year');
+        $month = $request->get('month');
+        if ($year) {
+            $startDate = Carbon::createFromFormat('Y', $year)->startOfYear();
+            $endDate = Carbon::createFromFormat('Y', $year)->endOfYear();
+            $query->whereBetween('date', [$startDate, $endDate]);
+
+            $upcomingbillsByMonth = $query->get()->groupBy(function ($upcomingbill) {
+                return Carbon::parse($upcomingbill->date)->format('F');
+            });
+
+            if ($month) {
+                $upcomingbillsForMonth = $upcomingbillsByMonth->get($month, collect());
+                return [
+                    'Total Upcomingbill' => $upcomingbillsForMonth->count(),
+                    'upcomingbills' => $upcomingbillsForMonth,
+                ];
             }
 
-            $upcomingbill = $query->orderBy('date', 'desc')->paginate();
+            $months = collect();
+            for ($i = 1; $i <= 12; $i++) {
+                $monthName = Carbon::createFromFormat('m', $i)->format('F');
+                $upcomingbillsForMonth = $upcomingbillsByMonth->get($monthName, collect());
+                $months->put($monthName, ['Number of upcomingbills' => $upcomingbillsForMonth->count()]);
+            }
 
-            //$upcomingbill = UpcomingBill::where($queryItems)->paginate();
-
-            return new UpcomingbillCollection($upcomingbill->appends($request->query()));
+            return $months;
         }
+
+        // Fetch paginated upcoming bills
+        $upcomingbills = $query->paginate();
+
+        $upcomingbills = $query->orderBy('date', 'asc')->paginate();
+
+        return new UpcomingbillCollection($upcomingbills->appends($request->query()));
     }
 
-
-    // public function index(){
-
-    //     //Logic to paginate the store data 
-    //     return new UpcomingbillCollection(UpcomingBill::paginate());
-    // }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        // Logic to get a specific upcomingbill by ID
-        $upcomingbill = Upcomingbill::find($id);
-        return response()->json($upcomingbill);
-    }
 
     /**
      * Store a newly created resource in storage.

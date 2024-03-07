@@ -24,12 +24,12 @@ class StoreCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'userID' => 'required|exists:users,id',
             'name' => 'required',
             'isIncome' => 'required',
-            'parentID' => 'required',
-            'level' => 'required',
-            'isOnboarding' => 'required',
+            'parentID' => 'sometimes|required',
         ];
     }
 }
+
+    //'level' => 'required',
+    //'isOnboarding' => 'required',

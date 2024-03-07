@@ -9,7 +9,7 @@ use App\Filters\ApiFilter;
 class GoalFilter extends ApiFilter{
 
     protected $allowedParms = [
-        'userID' => ['eq'],
+        //'userID' => ['eq'],
         'name' => ['eq', 'ne'],
         'amount' => ['eq', 'lt', 'gt', 'lte', 'gte'],
         'currentSave' => ['eq', 'lt', 'gt', 'lte', 'gte'],

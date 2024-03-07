@@ -95,7 +95,7 @@ class GoalController extends Controller
             for ($i = 1; $i <= 12; $i++) {
                 $monthName = Carbon::createFromFormat('m', $i)->format('F');
                 $goalsForMonth = $goalsByMonth->get($monthName, collect()); // Use month name to fetch goals
-                $months->put($monthName, ['Number of goals'=>$goalsForMonth->count()]); // Put count of goals for the month
+                $months->put($monthName, ['Number of goals' => $goalsForMonth->count()]); // Put count of goals for the month
             }
 
             return $months;
@@ -103,7 +103,9 @@ class GoalController extends Controller
 
         // Fetch paginated goals if year is not provided
         $goals = $query->orderBy('created_at', 'desc')->paginate();
-        return new GoalCollection($goals->appends($request->query()));
+        
+        //'Total SMART Goal' => $totalSmartGoals,
+        return new GoalCollection($goals->appends($request->query()));    
     }
 
 

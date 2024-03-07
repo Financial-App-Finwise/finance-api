@@ -76,15 +76,6 @@ Route::group(['prefix' => 'users'], function () {
     Route::delete('/{user}', [Api\V1\UserController::class, 'destroy']);
 });
 
-Route::group(['prefix' => 'categories'], function () {
-    Route::get('/', [Api\V1\CategoryController::class, 'index']);
-    Route::get('/{category}', [Api\V1\CategoryController::class, 'show']);
-    Route::post('/', [Api\V1\CategoryController::class, 'store']);
-    Route::put('/{category}', [Api\V1\CategoryController::class, 'update']);
-    Route::patch('/{category}', [Api\V1\CategoryController::class, 'update']);
-    Route::delete('/{category}', [Api\V1\CategoryController::class, 'destroy']);
-});
-
 Route::group([
     'middleware' => ['auth:sanctum'],
 ], function () {
@@ -113,6 +104,15 @@ Route::group([
         Route::put('/{transaction}', [Api\V1\TransactionController::class, 'update']);
         Route::patch('/{transaction}', [Api\V1\TransactionController::class, 'update']);
         Route::delete('/{transaction}', [Api\V1\TransactionController::class, 'destroy']);
+    });
+
+    Route::group(['prefix' => 'categories'], function () {
+        Route::get('/', [Api\V1\CategoryController::class, 'index']);
+        Route::get('/{category}', [Api\V1\CategoryController::class, 'show']);
+        Route::post('/', [Api\V1\CategoryController::class, 'store']);
+        Route::put('/{category}', [Api\V1\CategoryController::class, 'update']);
+        Route::patch('/{category}', [Api\V1\CategoryController::class, 'update']);
+        Route::delete('/{category}', [Api\V1\CategoryController::class, 'destroy']);
     });
 }); 
 
