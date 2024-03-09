@@ -19,8 +19,17 @@ class MyFinance extends Model
     public function user(){
         return $this->belongsTo(User::class);
     }
+
     public function currency()
     {
         return $this->belongsTo(Currency::class, 'currencyID');
+    }
+
+    public function toArray()
+    {
+        $array = parent::toArray();
+        $array['totalbalance'] = (float) $array['totalbalance'];
+
+        return $array;
     }
 }

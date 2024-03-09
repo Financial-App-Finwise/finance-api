@@ -27,5 +27,12 @@ class BudgetPlan extends Model
         return $this->hasMany(Transaction::class, 'budgetplanID');
     }
 
+    public function toArray()
+    {
+        $array = parent::toArray();
+        $array['amount'] = (float) $array['amount'];
+
+        return $array;
+    }
 }
 

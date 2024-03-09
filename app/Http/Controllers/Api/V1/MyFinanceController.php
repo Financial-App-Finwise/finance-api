@@ -22,18 +22,10 @@ use Carbon\Carbon;
 class MyFinanceController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
      * Display the specified resource.
      */
     public function show()
-    { 
+    {
         // get user id
         $user = auth()->user();
 
@@ -52,7 +44,7 @@ class MyFinanceController extends Controller
             // Count total expense and income of each day of the current week
             $currentWeekStart = now()->startOfWeek();
             $currentWeekEnd = now()->endOfWeek();
-        
+
             $totals = $transactions
                 ->whereBetween('date', [$currentWeekStart, $currentWeekEnd])
                 ->groupBy(function ($transaction) {
@@ -60,15 +52,15 @@ class MyFinanceController extends Controller
                 })
                 ->map(function ($dayTransactions) {
                     return [
-                        'total_income' => $dayTransactions->where('isIncome', true)->sum('amount'),
-                        'total_expense' => $dayTransactions->where('isIncome', false)->sum('amount'),
+                        'total_income' => (float) $dayTransactions->where('isIncome', true)->sum('amount'),
+                        'total_expense' => (float) $dayTransactions->where('isIncome', false)->sum('amount'),
                     ];
                 });
         } elseif ($periodFilter === 'this_month' || $periodFilter === 'last_month') {
-            // Count total expense and income of each week of the month (what is the total income and expense of the first week, second week, ...)
+            // Count total expense and income of each week of the month
             $monthStart = now()->startOfMonth();
             $monthEnd = now()->endOfMonth();
-            
+
             if ($periodFilter === 'last_month') {
                 $monthStart->subMonth();
                 $monthEnd->subMonth();
@@ -81,35 +73,33 @@ class MyFinanceController extends Controller
                 })
                 ->map(function ($weekTransactions) {
                     return [
-                        'total_income' => $weekTransactions->where('isIncome', true)->sum('amount'),
-                        'total_expense' => $weekTransactions->where('isIncome', false)->sum('amount'),
+                        'total_income' => (float) $weekTransactions->where('isIncome', true)->sum('amount'),
+                        'total_expense' => (float) $weekTransactions->where('isIncome', false)->sum('amount'),
                     ];
                 });
-            } else {
-                $subMonths = ($periodFilter === 'last_3_months') ? 2 : 4;
+        } else {
+            $subMonths = ($periodFilter === 'last_3_months') ? 2 : 4;
 
-                // Calculate the start and end dates for the specified period
-                $startOfMonth = now()->subMonths($subMonths)->startOfMonth(); // Start from two months ago
-                $endOfMonth = now()->addMonth()->endOfMonth(); // One month ahead
-                
-                $totals = $transactions
-                    ->whereBetween('date', [$startOfMonth, $endOfMonth])
-                    ->groupBy(function ($transaction) {
-                        return Carbon::parse($transaction->date)->format('Y-m');
-                    })
-                    ->map(function ($monthTransactions) {
-                        return [
-                            'total_income' => $monthTransactions->where('isIncome', true)->sum('amount'),
-                            'total_expense' => $monthTransactions->where('isIncome', false)->sum('amount'),
-                        ];
-                    });
-            }
-            
-              
+            // Calculate the start and end dates for the specified period
+            $startOfMonth = now()->subMonths($subMonths)->startOfMonth();
+            $endOfMonth = now()->addMonth()->endOfMonth();
+
+            $totals = $transactions
+                ->whereBetween('date', [$startOfMonth, $endOfMonth])
+                ->groupBy(function ($transaction) {
+                    return Carbon::parse($transaction->date)->format('Y-m');
+                })
+                ->map(function ($monthTransactions) {
+                    return [
+                        'total_income' => (float) $monthTransactions->where('isIncome', true)->sum('amount'),
+                        'total_expense' => (float) $monthTransactions->where('isIncome', false)->sum('amount'),
+                    ];
+                });
+        }
 
         ////////Count all expenses and income
-        $totalExpenses = $transactions->where('isIncome', 0)->sum('amount');
-        $totalIncome = $transactions->where('isIncome', 1)->sum('amount');        
+        $totalExpenses = (float) $transactions->where('isIncome', 0)->sum('amount');
+        $totalIncome = (float) $transactions->where('isIncome', 1)->sum('amount');
 
         // Apply isIncome filter if provided
         if ($isIncomeFilter !== null) {
@@ -120,23 +110,22 @@ class MyFinanceController extends Controller
         $topTransactions = collect($transactions)->groupBy('note')->map(function ($group) {
             return [
                 'note' => $group[0]->note,
-                'amount' => $group->sum('amount'),
+                'amount' => (float) $group->sum('amount'),
             ];
         })->sortByDesc('amount')->values()->all();
-        
-        ///////All Transation 
+
+        ///////All Transaction
         $groupedTransactions = collect($transactions)->groupBy(function ($transaction) {
             return Carbon::parse($transaction->date)->startOfDay()->format('Y-m-d');
         });
-        
+
         $today = Carbon::today()->format('Y-m-d');
         $yesterday = Carbon::yesterday()->format('Y-m-d');
-        
+
         $allTransactions = [
             'today' => collect($groupedTransactions->get($today, []))->take(2)->all(),
             'yesterday' => collect($groupedTransactions->get($yesterday, []))->take(2)->all(),
         ];
-        
 
         return response()->json([
             'success' => 'true',
@@ -177,15 +166,6 @@ class MyFinanceController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
-     */
-    public function store()
-    {
-
-    }
-
-
-    /**
      * Update the specified resource in storage.
      */
     public function update(UpdateMyFinanceRequest $request, MyFinance $myfinance)
@@ -198,7 +178,6 @@ class MyFinanceController extends Controller
             $myfinance->where('userID', $user->id)->update(['totalbalance' => $data['totalbalance']]);
 
             $updatedMyFinance = MyFinance::where('userID', $user->id)
-            // ->where('your_column_name', $filter)
             ->with('currency')
             ->get();
 
@@ -206,7 +185,7 @@ class MyFinanceController extends Controller
             return response()->json(['success'=> 'false', 'message' => 'Failed to update Net Worth'], 500);
         }
 
-        return response()->json(['success'=> 'true', 'message' => 'Net Worth updated successfully', 'data' => MyFinanceResource::collection($updatedMyFinance)]);
+        return response()->json(['success'=> 'true', 'message' => 'Net Worth updated successfully', 'data' => $updatedMyFinance]);
     }
 
     /**
@@ -216,6 +195,4 @@ class MyFinanceController extends Controller
     {
         //
     }
-
-    
 }
