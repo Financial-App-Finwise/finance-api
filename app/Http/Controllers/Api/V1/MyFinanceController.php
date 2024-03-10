@@ -37,6 +37,7 @@ class MyFinanceController extends Controller
             ->with('currency')
             ->get();
         $transactions = Transaction::where('userID', $user->id)
+            ->with('category')
             ->get();
 
         ////////Bar Chart
@@ -107,10 +108,10 @@ class MyFinanceController extends Controller
         }
 
         ////////Donut Chart
-        $topTransactions = collect($transactions)->groupBy('note')->map(function ($group) {
+        $topTransactions = collect($transactions)->groupBy('categoryID')->map(function ($group) {
             return [
-                'note' => $group[0]->note,
-                'amount' => (float) $group->sum('amount'),
+                'category' => $group[0]->category,
+                'amount' => (float) $group->sum('amount')
             ];
         })->sortByDesc('amount')->values()->all();
 
