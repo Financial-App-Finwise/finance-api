@@ -98,6 +98,10 @@ class MyFinanceController extends Controller
                 });
         }
 
+        ////////Filtered expenses and income based on bar chart
+        $filteredExpenses = (float) $totals->sum('total_expense');
+        $filteredIncome = (float) $totals->sum('total_income');
+
         ////////Count all expenses and income
         $totalExpenses = (float) $transactions->where('isIncome', 0)->sum('amount');
         $totalIncome = (float) $transactions->where('isIncome', 1)->sum('amount');
@@ -124,15 +128,25 @@ class MyFinanceController extends Controller
         $yesterday = Carbon::yesterday()->format('Y-m-d');
 
         $allTransactions = [
-            'today' => collect($groupedTransactions->get($today, []))->take(2)->all(),
-            'yesterday' => collect($groupedTransactions->get($yesterday, []))->take(2)->all(),
+            'today' => collect($groupedTransactions->get($today, []))
+                ->sortByDesc('date')
+                ->take(2)
+                ->values()
+                ->all(),
+            'yesterday' => collect($groupedTransactions->get($yesterday, []))
+                ->sortByDesc('date')
+                ->take(2)
+                ->values()
+                ->all(),
         ];
-
+        
         return response()->json([
             'success' => 'true',
             'data' => [
                 'finance' => $myfinance,
                 'totals' => $totals,
+                'filtered_expenses' => $filteredExpenses,
+                'filtered_incomes' => $filteredIncome,
                 'total_expenses' => $totalExpenses,
                 'total_incomes' => $totalIncome,
                 'top_transactions' => $topTransactions,
@@ -176,15 +190,37 @@ class MyFinanceController extends Controller
         $data = $request->validated();
 
         try {
+            // Retrieve the old balance before the update
+            $oldBalance = $myfinance->where('userID', $user->id)->value('totalbalance');
+
+            // Update the totalbalance in MyFinance
             $myfinance->where('userID', $user->id)->update(['totalbalance' => $data['totalbalance']]);
 
+            // Fetch updated MyFinance data
             $updatedMyFinance = MyFinance::where('userID', $user->id)
-            ->with('currency')
-            ->get();
+                ->with('currency')
+                ->first();
 
         } catch (Exception $e) {
             return response()->json(['success'=> 'false', 'message' => 'Failed to update Net Worth'], 500);
         }
+
+        // Calculate the difference between the old and new balance
+        $balanceDifference = $data['totalbalance'] - $oldBalance;
+        // Determine whether it is income or expense
+        $isIncome = ($balanceDifference >= 0) ? 1 : 0;
+
+        # Add Transacion
+        $transaction = new Transaction([
+            'userID' => $user->id,
+            'categoryID' => 1,
+            'isIncome' => $isIncome,
+            'amount' => abs($balanceDifference),
+            'hasContributed' => 0,
+            'date' => Carbon::now(),
+            'note' => "Balance Update",
+        ]);
+        $transaction->save();
 
         return response()->json(['success'=> 'true', 'message' => 'Net Worth updated successfully', 'data' => $updatedMyFinance]);
     }
