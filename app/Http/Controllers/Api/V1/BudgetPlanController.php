@@ -20,6 +20,9 @@ class BudgetPlanController extends Controller
      */
     public function index(string $year, string $month)
     {
+        $today = now()->toDateString();
+	    $yesterday = now()->subDay()->toDateString();
+
         // get user id
         $user = auth()->user();
     
@@ -40,6 +43,19 @@ class BudgetPlanController extends Controller
         $plannedBudgets = (float) $budgetPlans->sum('amount');
     
         $budgetPlansWithCount = $budgetPlans->map(function ($budgetPlan) {
+            
+            $groupedTransactions = $budgetPlan->transactions->groupBy(function ($transaction) use ($today, $yesterday) {
+                $formattedDate = \Carbon\Carbon::parse($transaction->date)->toDateString();
+                if ($formattedDate === $today) {
+                    return 'today';
+                } elseif ($formattedDate === $yesterday) {
+                    return 'yesterday';
+                } else {
+                    return $formattedDate;
+                }
+            });
+    
+            $budgetPlan['transactions'] = $groupedTransactions;
             $budgetPlan['transactions_count'] = (int) $budgetPlan->transactions->count();
             $budgetPlan['spent'] = (float) $budgetPlan->transactions->sum('amount');
             $budgetPlan['remaining_amount'] = (float) ($budgetPlan->amount - $budgetPlan['spent']);
@@ -164,11 +180,11 @@ class BudgetPlanController extends Controller
     
         // retrieve budget plans for a specific year and group by month
         $budgetPlans = BudgetPlan::where('userID', $user->id)
-                        ->whereYear('created_at', $year)
-                        ->orderBy('created_at', 'asc')
+                        ->whereYear('date', $year)
+                        ->orderBy('date', 'asc')
                         ->get()
                         ->groupBy(function($date) {
-                            return Carbon::parse($date->created_at)->format('m');
+                            return Carbon::parse($date->date)->format('m');
                         });
     
         $formattedData = [];
