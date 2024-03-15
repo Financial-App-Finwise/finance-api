@@ -21,7 +21,7 @@ class StoreUserOnboardingInfoRequest extends FormRequest
             'marital_status' => 'string|max:50',
             'life_stage' => 'string|max:50',
             'net_worth' => 'numeric',
-            'currencyID' => 'required|exists:currencies,id',
+            'currencyID' => 'exists:currencies,id',
             'daily_expense' => 'numeric',
             'weekly_expense' => 'numeric',
             'monthly_expense' => 'numeric',
@@ -29,10 +29,13 @@ class StoreUserOnboardingInfoRequest extends FormRequest
             'weekly_income' => 'numeric',
             'monthly_income' => 'numeric',
             'categories' => 'array',
-            'categories.*' => 'integer',
+            'categories.*.categoryID' => 'integer',
+            'parentCategories' => 'array',
+            'parentCategories.*.parentID' => 'integer',
+            'parentCategories.*.amount' => 'numeric',
             'financial_goal' => 'string|max:100',
             'dream_amount' => 'numeric',
             'envision_date' => 'date',
-        ];
+        ];        
     }
 }

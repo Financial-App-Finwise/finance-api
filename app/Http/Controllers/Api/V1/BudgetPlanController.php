@@ -43,9 +43,10 @@ class BudgetPlanController extends Controller
             $budgetPlan['transactions_count'] = (int) $budgetPlan->transactions->count();
             $budgetPlan['spent'] = (float) $budgetPlan->transactions->sum('amount');
             $budgetPlan['remaining_amount'] = (float) ($budgetPlan->amount - $budgetPlan['spent']);
-            unset($budgetPlan['transactions']); // Remove the transactions data
             return $budgetPlan;
         });
+
+
     
         $spent = (float) Transaction::where('userID', $user->id)
             ->whereNotNull('budgetplanID')

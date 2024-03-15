@@ -18,6 +18,7 @@ class OnboardingExpenseCategoryResource extends JsonResource
             'id' => $this->id,
             'onboardingID' => $this->onboardingID,
             'categoryID' => $this->categoryID,
+            'parentID' => $this->parentID,
             'amount' => $this->amount
         ];
     }

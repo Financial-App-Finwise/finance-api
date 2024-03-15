@@ -39,13 +39,21 @@ class UserOnboardingInfoController extends Controller
         MyFinance::create(['sessionID' => $onboardingSessionId, 'totalbalance' => $validatedData['net_worth'], 'currencyID' => $validatedData['currencyID']]);
 
         // Extract categories and amounts from the validated data
-        $categoryAmounts = $validatedData['categories'] ?? [];
+        $categories = $validatedData['categories'] ?? [];
+        $parentCategories = $validatedData['parentCategories'] ?? [];
 
-        foreach ($categoryAmounts as $categoryId => $amount) {
+        foreach ($categories as $category) {
             OnboardingExpenseCategory::create([
                 'onboardingID' => $userOnboardingInfo->id,
-                'categoryID' => $categoryId,
-                'amount' => $amount,
+                'categoryID' => $category['categoryID']
+            ]);
+        }
+
+        foreach ($parentCategories as $parentCategory) {
+            OnboardingExpenseCategory::create([
+                'onboardingID' => $userOnboardingInfo->id,
+                'parentID' => $parentCategory['parentID'],
+                'amount' => $parentCategory['amount']
             ]);
         }
     
@@ -65,16 +73,24 @@ class UserOnboardingInfoController extends Controller
         MyFinance::create(['userID' => $user->id, 'totalbalance' => $validatedData['net_worth'], 'currencyID' => $validatedData['currencyID']]);
 
         // Extract categories and amounts from the validated data
-        $categoryAmounts = $validatedData['categories'] ?? [];
+        $categories = $validatedData['categories'] ?? [];
+        $parentCategories = $validatedData['parentCategories'] ?? [];
 
-        foreach ($categoryAmounts as $categoryId => $amount) {
+        foreach ($categories as $category) {
             OnboardingExpenseCategory::create([
                 'onboardingID' => $userOnboardingInfo->id,
-                'categoryID' => $categoryId,
-                'amount' => $amount,
+                'categoryID' => $category['categoryID']
             ]);
         }
-    
+
+        foreach ($parentCategories as $parentCategory) {
+            OnboardingExpenseCategory::create([
+                'onboardingID' => $userOnboardingInfo->id,
+                'parentID' => $parentCategory['parentID'],
+                'amount' => $parentCategory['amount']
+            ]);
+        }
+
         // Return the resource
         return response()->json(['success' => true, 'message' => 'User onboarding information stored successfully.']);
     }
