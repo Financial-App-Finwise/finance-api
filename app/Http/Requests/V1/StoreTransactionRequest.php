@@ -23,12 +23,14 @@ class StoreTransactionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'categoryID' => 'required',
+            'categoryID' => 'sometimes',
             'isIncome' => 'required',
             'amount' => 'required|numeric',
             'hasContributed' => 'sometimes|boolean',
             'upcomingbillID' => 'sometimes',
             'budgetplanID' => 'sometimes',
+            'goalID' => 'sometimes', // Add this rule to allow specifying a goal ID
+            'contributionAmount' => 'sometimes|numeric',
             'expenseType' => 'required',
             'date' => 'required',
             'note' => 'sometimes',

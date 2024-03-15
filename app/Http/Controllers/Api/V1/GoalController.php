@@ -102,10 +102,10 @@ class GoalController extends Controller
         }
 
         // Fetch paginated goals if year is not provided
-        $goals = $query->orderBy('created_at', 'desc')->paginate();
-        
+        $goals = $query->orderBy('id', 'desc')->paginate();
         //'Total SMART Goal' => $totalSmartGoals,
         return new GoalCollection($goals->appends($request->query()));    
+
     }
 
 

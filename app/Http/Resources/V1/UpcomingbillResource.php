@@ -19,7 +19,7 @@ class UpcomingbillResource extends JsonResource
             'id' => $this->id,
             'userID' => $this->userID,
             'categoryID' => $this->categoryID,
-            'amount' => $this->amount,
+            'amount' => (float)$this->amount,
             'date' => $this->date->format('Y-m-d H:i:s'),
             'name' => $this->name,
             'note' => $this->note,

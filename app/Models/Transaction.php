@@ -35,6 +35,11 @@ class Transaction extends Model
     {
         return $this->belongsTo(BudgetPlan::class, 'budgetplanID');
     }
+    
+    public function upcomingBill()
+    {
+        return $this->belongsTo(UpcomingBill::class, 'upcomingbillID');
+    }
 
 }
 

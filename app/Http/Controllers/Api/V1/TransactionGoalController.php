@@ -15,6 +15,9 @@ use App\Http\Resources\V1\TransactionGoalCollection;
 
 use App\Filters\V1\TransactionGoalFilter;
 
+use App\Events\TransactionGoalSaved;
+
+
 class TransactionGoalController extends Controller
 {
     /**
@@ -46,12 +49,12 @@ class TransactionGoalController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
-    {
-        // Logic to get a specific TransactionGoal by ID
-        $transactionGoal = TransactionGoal::find($id);
-        return response()->json($transactionGoal);
-    }
+    // public function create()
+    // {
+    //     // Logic to get a specific TransactionGoal by ID
+    //     $transactionGoal = TransactionGoal::find($id);
+    //     return response()->json($transactionGoal);
+    // }
 
     /**
      * Store a newly created resource in storage.
@@ -78,6 +81,9 @@ class TransactionGoalController extends Controller
 
             // Save the transactionGoal to the database
             $transactionGoal->save();
+            
+            // Dispatch the TransactionGoalSaved event
+            TransactionGoalSaved::dispatch($transactionGoal);
 
             return new TransactionGoalResource($transactionGoal);
         } catch (\Exception $e) {

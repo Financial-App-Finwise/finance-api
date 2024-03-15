@@ -23,6 +23,10 @@ class Category extends Model
     {
         return $this->belongsTo(User::class, 'userID');
     }
+    public function parentCategory()
+    {
+        return $this->belongsTo(Category::class, 'parentID');
+    }
 
     
     // public function parent()

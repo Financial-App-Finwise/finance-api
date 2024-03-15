@@ -10,7 +10,11 @@ use App\Http\Requests\V1\UpdateTransactionRequest;
 
 use App\Models\User;
 use App\Models\Transaction;
+use App\Models\Goal;
+use App\Models\TransactionGoal;
 use App\Http\Resources\V1\TransactionResource;
+use App\Http\Resources\V1\TransactionGoalResource;
+
 use App\Http\Resources\V1\TransactionCollection;
 
 use App\Filters\V1\TransactionFilter;
@@ -48,16 +52,94 @@ class TransactionController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
-    {
-        // Logic to get a specific upcomingbill by ID
-        $transaction = Transaction::find($id);
-        return response()->json($transaction);
-    }
+    // public function create()
+    // {
+    //     // Logic to get a specific upcomingbill by ID
+    //     $transaction = Transaction::find($id);
+    //     return response()->json($transaction);
+    // }
 
     /**
      * Store a newly created resource in storage.
      */
+    // public function store(StoreTransactionRequest $request)
+    // {
+    //     try {
+    //         // Get user id from jwt token
+    //         $user = auth()->user();
+
+    //         // Add user id to the request
+    //         $request->merge(['userID' => $user->id]);
+
+    //         // Validate the incoming request
+    //         $validatedData = $request->validated();
+
+    //         $validatedData['userID'] = $user->id;
+
+    //         // Create a new transaction instance
+    //         $transaction = new Transaction();
+
+    //         // Populate the transaction attributes with validated data
+    //         $transaction->fill($validatedData);
+
+    //         // Save the transaction to the database
+    //         $transaction->save();
+
+    //         return new TransactionResource($transaction);
+    //     } catch (\Exception $e) {
+    //         return response()->json(['error' => $e->getMessage()], 400);
+    //     }
+    // }
+
+    // public function store(StoreTransactionRequest $request)
+    // {
+    //     try {
+    //         // Get user id from jwt token
+    //         $user = auth()->user();
+
+    //         // Add user id to the request
+    //         $request->merge(['userID' => $user->id]);
+
+    //         // Validate the incoming request
+    //         $validatedData = $request->validated();
+
+    //         $validatedData['userID'] = $user->id;
+
+    //         // Check if contribution to smart goal is specified
+    //         if ($request->has('goalID') && $request->has('contributionAmount')) {
+    //             // Calculate the contribution amount
+    //             $contributionAmount = $request->input('contributionAmount');
+
+    //             // Deduct the contribution amount from the original transaction amount
+    //             $validatedData['amount'] -= $contributionAmount;
+
+    //             // Save the modified transaction details to the transactions table
+    //             $transaction = new Transaction();
+    //             $transaction->fill($validatedData);
+    //             $transaction->save();
+
+    //             // Save the contribution details to the transaction_goals table
+    //             $transactionGoal = new TransactionGoal();
+    //             $transactionGoal->userID = $user->id;
+    //             $transactionGoal->transactionID = $transaction->id;
+    //             $transactionGoal->goalID = $request->input('goalID');
+    //             $transactionGoal->ContributionAmount = $contributionAmount;
+    //             $transactionGoal->save();
+
+    //             return response()->json(['transaction' => new TransactionResource($transaction), 'transactionGoal' => new TransactionGoalResource($transactionGoal)], 201);
+    //         } else {
+    //             // If no contribution to smart goal is specified, simply save the transaction
+    //             $transaction = new Transaction();
+    //             $transaction->fill($validatedData);
+    //             $transaction->save();
+
+    //             return new TransactionResource($transaction);
+    //         }
+    //     } catch (\Exception $e) {
+    //         return response()->json(['error' => $e->getMessage()], 400);
+    //     }
+    // }
+
     public function store(StoreTransactionRequest $request)
     {
         try {
@@ -72,20 +154,48 @@ class TransactionController extends Controller
 
             $validatedData['userID'] = $user->id;
 
-            // Create a new transaction instance
-            $transaction = new Transaction();
+            // Check if contribution to smart goal is specified
+            if ($request->has('goalID') && $request->has('contributionAmount')) {
+                // Calculate the contribution amount
+                $contributionAmount = $request->input('contributionAmount');
 
-            // Populate the transaction attributes with validated data
-            $transaction->fill($validatedData);
+                // Retrieve the corresponding goal based on the goalID
+                $goal = Goal::findOrFail($request->input('goalID'));
 
-            // Save the transaction to the database
-            $transaction->save();
+                // Deduct the contribution amount from the remainingSave column of the goal
+                $goal->remainingSave -= $contributionAmount;
+                $goal->save();
 
-            return new TransactionResource($transaction);
+                // Deduct the contribution amount from the original transaction amount
+                $validatedData['amount'] -= $contributionAmount;
+
+                // Save the modified transaction details to the transactions table
+                $transaction = new Transaction();
+                $transaction->fill($validatedData);
+                $transaction->save();
+
+                // Save the contribution details to the transaction_goals table
+                $transactionGoal = new TransactionGoal();
+                $transactionGoal->userID = $user->id;
+                $transactionGoal->transactionID = $transaction->id;
+                $transactionGoal->goalID = $request->input('goalID');
+                $transactionGoal->ContributionAmount = $contributionAmount;
+                $transactionGoal->save();
+
+                return response()->json(['transaction' => new TransactionResource($transaction), 'transactionGoal' => new TransactionGoalResource($transactionGoal)], 201);
+            } else {
+                // If no contribution to smart goal is specified, simply save the transaction
+                $transaction = new Transaction();
+                $transaction->fill($validatedData);
+                $transaction->save();
+
+                return new TransactionResource($transaction);
+            }
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 400);
         }
     }
+
     /**
      * Display the specified resource.
      */

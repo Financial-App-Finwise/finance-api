@@ -28,6 +28,8 @@ class StoreUpcomingbillRequest extends FormRequest
             'date' => 'required|date_format:Y-m-d H:i:s',
             'name' => 'sometimes',
             'note' => 'sometimes',
+            'note' => 'sometimes',
+
         ];
     }
 }

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('userID');
-            $table->unsignedBigInteger('categoryID');
+            $table->unsignedBigInteger('categoryID')->nullable();
             $table->tinyInteger('isIncome')->default(0); // Default type to 0 for expense and 1 for income
             $table->decimal('amount', 10, 2)->default(0);
             $table->tinyInteger('hasContributed')->default(0); // Default to 0 for has contributed to goal and 1 for hasn't.
