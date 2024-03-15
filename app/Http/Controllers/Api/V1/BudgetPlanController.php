@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\StoreBudgetPlanRequest;
 use App\Http\Requests\V1\UpdateBudgetPlanRequest;
-
 use App\Models\BudgetPlan;
 use App\Models\Transaction;
 use App\Http\Resources\V1\BudgetPlanResource;
@@ -23,9 +22,9 @@ class BudgetPlanController extends Controller
     {
         // get user id
         $user = auth()->user();
-
+    
         $isMonthlyFilter = request('is_monthly', null);
-
+    
         $budgetPlansQuery = BudgetPlan::with('transactions')
             ->where('userID', $user->id)
             ->whereYear('date', $year)
@@ -38,23 +37,24 @@ class BudgetPlanController extends Controller
         $budgetPlans = $budgetPlansQuery->orderBy('date', 'asc')->get();
     
         $totalBudgetPlans = $budgetPlans->count();
-        $plannedBudgets = $budgetPlans->sum('amount');
+        $plannedBudgets = (float) $budgetPlans->sum('amount');
     
         $budgetPlansWithCount = $budgetPlans->map(function ($budgetPlan) {
-            $budgetPlan['transactions_count'] = $budgetPlan->transactions->count();
-            $budgetPlan['spent'] = $budgetPlan->transactions->sum('amount');
-            $budgetPlan['remaining_amount'] = $budgetPlan->amount - $budgetPlan['spent'];
-            unset($budgetPlan['transactions']); // Remove the transactions data
+            $budgetPlan['transactions_count'] = (int) $budgetPlan->transactions->count();
+            $budgetPlan['spent'] = (float) $budgetPlan->transactions->sum('amount');
+            $budgetPlan['remaining_amount'] = (float) ($budgetPlan->amount - $budgetPlan['spent']);
             return $budgetPlan;
         });
+
+
     
-        $spent = Transaction::where('userID', $user->id)
+        $spent = (float) Transaction::where('userID', $user->id)
             ->whereNotNull('budgetplanID')
             ->sum('amount');
     
-        $available = $plannedBudgets - $spent;
-        $overBudget = ($spent > $plannedBudgets) ? $spent - $plannedBudgets : 0;
-
+        $available = (float) ($plannedBudgets - $spent);
+        $overBudget = (float) (($spent > $plannedBudgets) ? $spent - $plannedBudgets : 0);
+    
         return response()->json([
             'success' => 'true',
             'data' => [
@@ -66,12 +66,7 @@ class BudgetPlanController extends Controller
                 'budget_plans' => $budgetPlansWithCount
             ],
         ]);
-        
-    }
-    
-    
-    
-    
+    }    
     
     private function getMonthName($monthNumber)
     {
@@ -94,7 +89,6 @@ class BudgetPlanController extends Controller
      */
     public function store(StoreBudgetPlanRequest $request)
     {
-        // Logic to create a new budget plan
         # get user id from jwt token
         $user = auth()->user();
         # add user id to the request
@@ -109,10 +103,10 @@ class BudgetPlanController extends Controller
     public function show(BudgetPlan $budgetplan)
     {
         $filter = request('filter', null);
-
+    
         // Load transactions relationship and apply sorting based on the request
         $transactions = $budgetplan->transactions();
-
+    
         switch ($filter) {
             case 'recently':
                 $transactions = $transactions->orderByDesc('date');
@@ -130,15 +124,15 @@ class BudgetPlanController extends Controller
             default:
                 break;
         }
-
+    
         // Now, retrieve the sorted transactions
         $sortedTransactions = $transactions->get();
-
+    
         // Group transactions with the same date into an array
         $groupedTransactions = $sortedTransactions->groupBy(function ($transaction) {
             // Format the date to only include the date portion
             $formattedDate = \Carbon\Carbon::parse($transaction->date)->toDateString();
-
+    
             // Determine if it's today, yesterday, or another day
             if ($formattedDate === \Carbon\Carbon::now()->toDateString()) {
                 return 'today';
@@ -148,21 +142,19 @@ class BudgetPlanController extends Controller
                 return $formattedDate;
             }
         });
-
+    
+        // Cast "amount" and other money-related values to float
+        $budgetplan['amount'] = (float) $budgetplan['amount'];
         $budgetplan['transactions'] = $groupedTransactions;
-
-        $budgetplan['transactions_count'] = $sortedTransactions->count();
-        $budgetplan['spent'] = $sortedTransactions->sum('amount');
-        $budgetplan['remaining_amount'] = $budgetplan->amount - $budgetplan['spent'];
-
+        $budgetplan['transactions_count'] = (int) $sortedTransactions->count();
+        $budgetplan['spent'] = (float) $sortedTransactions->sum('amount');
+        $budgetplan['remaining_amount'] = (float) ($budgetplan['amount'] - $budgetplan['spent']);
+    
         return response()->json(['success' => 'true', 'data' => $budgetplan]);
     }
+    
 
-    
-    
-    
-    
-        /**
+    /**
      * Display the specified resource.
      */
     public function show_summary(string $year)

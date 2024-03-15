@@ -5,7 +5,7 @@ namespace App\Http\Resources\V1;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class OnboardingExpenseCategoryResource extends JsonResource
+class PredictionResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,10 +16,10 @@ class OnboardingExpenseCategoryResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'onboardingID' => $this->onboardingID,
-            'categoryID' => $this->categoryID,
-            'parentID' => $this->parentID,
-            'amount' => $this->amount
+            'userID' => $this->userID,
+            'predicted_budget' => $this->predicted_budget,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
         ];
     }
 }

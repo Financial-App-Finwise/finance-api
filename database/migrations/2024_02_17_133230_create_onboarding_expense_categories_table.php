@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('onboarding_expense_categories', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('onboardingID');
-            $table->unsignedBigInteger('categoryID');
+            $table->unsignedBigInteger('categoryID')->nullable();
+            $table->unsignedBigInteger('parentID')->nullable();
             $table->decimal('amount', 10, 2)->default(0);
             $table->timestamps();
 

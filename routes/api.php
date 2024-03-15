@@ -1,7 +1,6 @@
 <?php
 namespace App\Http\Controllers;
 use App\Http\Requests\V1\UpdateUserRequest;
-
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserOnboardingInfoController;
@@ -19,15 +18,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-
-
-// Authentication routes
 Route::group(['prefix' => 'auth'], function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/verify-email', [AuthController::class, 'verifyEmail']);
     Route::post('/login', [AuthController::class, 'login']);
-
-    // These routes do not require authentication middleware
     Route::get('/forgot-password-code', [AuthController::class, 'forgotPasswordCode']);
     Route::post('/forgot-password-reset', [AuthController::class, 'forgotPasswordReset']);
 });
@@ -36,6 +30,14 @@ Route::group(['prefix' => 'onboardinginfo'], function () {
     Route::post('/store', [Api\V1\UserOnboardingInfoController::class, 'store']);
 });
 
+Route::group(['prefix' => 'users'], function () {
+    Route::get('/', [Api\V1\UserController::class, 'index']);
+    Route::get('/{user}', [Api\V1\UserController::class, 'show']);
+    Route::post('/', [Api\V1\UserController::class, 'store']);
+    Route::put('/{user}', [Api\V1\UserController::class, 'update']);
+    Route::patch('/{user}', [Api\V1\UserController::class, 'update']);
+    Route::delete('/{user}', [Api\V1\UserController::class, 'destroy']);
+});
 
 Route::group([
     'middleware' => ['auth:sanctum'],
@@ -54,6 +56,7 @@ Route::group([
         Route::put('/{budgetplan}', [Api\V1\BudgetPlanController::class, 'update']);
         Route::patch('/{budgetplan}', [Api\V1\BudgetPlanController::class, 'update']);
     });
+
     Route::group(['prefix' => 'myfinances'], function () {
         Route::get('/view-my-finance/', [Api\V1\MyFinanceController::class, 'show']);
         Route::post('/', [Api\V1\MyFinanceController::class, 'create']);
@@ -68,22 +71,15 @@ Route::group([
         Route::put('/', [Api\V1\UserOnboardingInfoController::class, 'update']);
         Route::patch('/', [Api\V1\UserOnboardingInfoController::class, 'update']);
     });
-}); 
 
+    Route::group(['prefix' => 'predictions'], function () {
+        Route::get('/', [Api\V1\PredictionController::class, 'index']);
+        Route::post('/', [Api\V1\PredictionController::class, 'store']);
+        Route::put('/', [Api\V1\PredictionController::class, 'update']);
+        Route::patch('/', [Api\V1\PredictionController::class, 'update']);
+        Route::delete('/', [Api\V1\PredictionController::class, 'destroy']);
+    });
 
-
-Route::group(['prefix' => 'users'], function () {
-    Route::get('/', [Api\V1\UserController::class, 'index']);
-    Route::get('/{user}', [Api\V1\UserController::class, 'show']);
-    Route::post('/', [Api\V1\UserController::class, 'store']);
-    Route::put('/{user}', [Api\V1\UserController::class, 'update']);
-    Route::patch('/{user}', [Api\V1\UserController::class, 'update']);
-    Route::delete('/{user}', [Api\V1\UserController::class, 'destroy']);
-});
-
-Route::group([
-    'middleware' => ['auth:sanctum'],
-], function () {
     Route::group(['prefix' => 'upcomingbills'], function () {
         Route::get('/', [Api\V1\UpcomingbillController::class, 'index']);
         Route::get('/{upcomingbill}', [Api\V1\UpcomingbillController::class, 'show']);
