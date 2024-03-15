@@ -76,7 +76,7 @@ class PredictionController extends Controller
         // Add user id to the request
         $user = auth()->user();
 
-        $prediction = Prediction::where('userID', $user->id)-›get();
+        $prediction = Prediction::where('userID', $user->id)->get();
         // Check if the model is retrieved successfully
         if (!$prediction) {
             return response()->json(['success' => false, 'message' => 'Prediction not found']);
