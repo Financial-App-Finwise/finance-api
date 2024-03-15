@@ -107,6 +107,15 @@ Route::group([
         Route::delete('/{transaction}', [Api\V1\TransactionController::class, 'destroy']);
     });
 
+    Route::group(['prefix' => 'transaction_goals'], function () {
+        Route::get('/', [Api\V1\TransactionGoalController::class, 'index']);
+        Route::get('/{transaction_goals}', [Api\V1\TransactionGoalController::class, 'show']);
+        Route::post('/', [Api\V1\TransactionGoalController::class, 'store']);
+        Route::put('/{transaction_goals}', [Api\V1\TransactionGoalController::class, 'update']);
+        Route::patch('/{transaction_goals}', [Api\V1\TransactionGoalController::class, 'update']);
+        Route::delete('/{transaction_goals}', [Api\V1\TransactionGoalController::class, 'destroy']);
+    });
+
     Route::group(['prefix' => 'categories'], function () {
         Route::get('/', [Api\V1\CategoryController::class, 'index']);
         Route::get('/{category}', [Api\V1\CategoryController::class, 'show']);
