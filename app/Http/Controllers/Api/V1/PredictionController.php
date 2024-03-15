@@ -18,8 +18,8 @@ class PredictionController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $predictions = Prediction::where('userID', $user->id)->get();
-        return PredictionResource::collection($predictions);
+        $prediction = Prediction::where('userID', $user->id)->first();
+        return response()->json(['success' => true, 'data' => $prediction]);
     }
 
     /**
@@ -48,7 +48,7 @@ class PredictionController extends Controller
             // If no prediction exists for the user, create a new one
             $predictionData['userID'] = $user->id;
             $prediction = Prediction::create($predictionData);
-            return response()->json(['success' => true, 'data' => new PredictionResource($prediction)]);
+            return response()->json(['success' => true, 'data' => $prediction]);
         }
     }
 
@@ -73,14 +73,14 @@ class PredictionController extends Controller
      */
     public function update(UpdatePredictionRequest $request)
     {
+        // Add user id to the request
+        $user = auth()->user();
+        
         $prediction = Prediction::where ('userID', $user->id)-›first();
         // Check if the model is retrieved successfully
         if (!$prediction) {
             return response()->json(['success' => false, 'message' => 'Prediction not found']);
         }
-
-        // Add user id to the request
-        $user = auth()->user();
 
         // Check if the prediction belongs to the user
         if ($prediction->userID != $user->id) {
