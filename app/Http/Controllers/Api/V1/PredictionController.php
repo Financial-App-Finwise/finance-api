@@ -105,13 +105,20 @@ class PredictionController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Prediction $prediction)
+    public function destroy()
     {
+        // Add user id to the request
         $user = auth()->user();
 
-        // Check if the authenticated user is the owner of the prediction
-        if ($prediction->userID !== $user->id) {
-            return response()->json(['success' => false, 'message' => 'You are not authorized to delete this prediction']);
+        $prediction = Prediction::where('userID', $user->id)->first(); // Fetch the prediction
+        // Check if the model is retrieved successfully
+        if (!$prediction) {
+            return response()->json(['success' => false, 'message' => 'Prediction not found']); // Fix array syntax
+        }
+
+        // Check if the prediction belongs to the user
+        if ($prediction->userID != $user->id) {
+            return response()->json(['success' => false, 'message' => "You are not authorized to update this prediction"]); // Fix array syntax and string
         }
 
         // Logic to delete a prediction by ID

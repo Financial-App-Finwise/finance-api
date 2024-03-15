@@ -77,7 +77,7 @@ Route::group([
         Route::post('/', [Api\V1\PredictionController::class, 'store']);
         Route::put('/', [Api\V1\PredictionController::class, 'update']);
         Route::patch('/', [Api\V1\PredictionController::class, 'update']);
-        Route::delete('/{prediction}', [Api\V1\PredictionController::class, 'destroy']);
+        Route::delete('/', [Api\V1\PredictionController::class, 'destroy']);
     });
 
     Route::group(['prefix' => 'upcomingbills'], function () {
