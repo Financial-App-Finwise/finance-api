@@ -56,7 +56,7 @@ class BudgetPlanController extends Controller
                 }
             }          
             $budgetPlan['transactions'] = $groupedTransactions;
-            $budgetPlan['transactions_count'] = (int) $budgetPlan->transactions->count();
+            $budgetPlan['transactions_count'] = (int) count($budgetPlan['transactions']);
             $budgetPlan['spent'] = (float) $budgetPlan->transactions->sum('amount');
             $budgetPlan['remaining_amount'] = (float) ($budgetPlan->amount - $budgetPlan['spent']);
             return $budgetPlan;
