@@ -42,7 +42,7 @@ class BudgetPlanController extends Controller
         $totalBudgetPlans = $budgetPlans->count();
         $plannedBudgets = (float) $budgetPlans->sum('amount');
     
-        $budgetPlansWithTransactions = $budgetPlans->map(function ($budgetPlan) use ($today, $yesterday) {
+        $budgetPlans = $budgetPlans->map(function ($budgetPlan) use ($today, $yesterday) {
             // Group transactions with the same date into an array
             $groupedTransactions = $budgetPlan->transactions->groupBy(function ($transaction) use ($today, $yesterday) {
                 $formattedDate = \Carbon\Carbon::parse($transaction->date)->toDateString();
@@ -79,7 +79,7 @@ class BudgetPlanController extends Controller
                 'spent' => $spent,
                 'planned_budgets' => $plannedBudgets,
                 'over_budget' => $overBudget,
-                'budget_plans' => $budgetPlansWithCount
+                'budget_plans' => $budgetPlans
             ],
         ]);
     }    
