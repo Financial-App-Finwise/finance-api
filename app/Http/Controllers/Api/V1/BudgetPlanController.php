@@ -43,6 +43,10 @@ class BudgetPlanController extends Controller
         $plannedBudgets = (float) $budgetPlans->sum('amount');
     
         $budgetPlans = $budgetPlans->map(function ($budgetPlan) use ($today, $yesterday) {
+            $budgetPlan['transactions_count'] = (int) count($budgetPlan['transactions']);
+            $budgetPlan['spent'] = (float) $budgetPlan->transactions->sum('amount');
+            $budgetPlan['remaining_amount'] = (float) ($budgetPlan->amount - $budgetPlan['spent']);
+
             // Group transactions  the same date into an array
             $groupedTransactions = [];
             foreach ($budgetPlan->transactions as $transaction) {
@@ -56,9 +60,6 @@ class BudgetPlanController extends Controller
                 }
             }          
             $budgetPlan['transactions'] = $groupedTransactions;
-            $budgetPlan['transactions_count'] = (int) count($budgetPlan['transactions']);
-            $budgetPlan['spent'] = (float) $budgetPlan->transactions->sum('amount');
-            $budgetPlan['remaining_amount'] = (float) ($budgetPlan->amount - $budgetPlan['spent']);
             return $budgetPlan;
         });
 
