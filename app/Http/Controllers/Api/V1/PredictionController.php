@@ -71,8 +71,9 @@ class PredictionController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdatePredictionRequest $request, Prediction $prediction)
+    public function update(UpdatePredictionRequest $request)
     {
+        $prediction = Prediction::where ('userID', $user->id)-›first();
         // Check if the model is retrieved successfully
         if (!$prediction) {
             return response()->json(['success' => false, 'message' => 'Prediction not found']);
