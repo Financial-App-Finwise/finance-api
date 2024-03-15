@@ -186,9 +186,7 @@ class BudgetPlanController extends Controller
                         ->groupBy(function($date) {
                             return Carbon::parse($date->date)->format('m');
                         });
-    
 
-        return $budgetPlans;
         $formattedData = [];
     
         // Loop through all months (1 to 12) and set count to 0 if no items found
