@@ -38,7 +38,7 @@ class PredictionController extends Controller
         $user = auth()->user();
         $predictionData = $request->validated();
         
-        $existingPrediction = Prediction::where('userID', $user->id)->get();
+        $existingPrediction = Prediction::where('userID', $user->id)->first();
 
         if ($existingPrediction) {
             // If a prediction already exists for the user, update it
