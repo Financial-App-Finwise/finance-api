@@ -4,6 +4,11 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Http\Requests\V1\StorePredictionRequest; 
+use App\Http\Requests\V1\UpdatePredictionRequest;
+use App\Models\Prediction;
+use App\Http\Resources\V1\PredictionResource;
+use App\Http\Resources\V1\PredictionCollection;
 
 class PredictionController extends Controller
 {
