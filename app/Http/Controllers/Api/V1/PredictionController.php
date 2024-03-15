@@ -18,7 +18,7 @@ class PredictionController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $predictions = $user->predictions;
+        $predictions = Prediction::where('userID', $user->id)->get();
         return PredictionResource::collection($predictions);
     }
 
@@ -38,7 +38,7 @@ class PredictionController extends Controller
         $user = auth()->user();
         $predictionData = $request->validated();
         
-        $existingPrediction = $user->predictions()->first();
+        $existingPrediction = Prediction::where('userID', $user->id)->get();
 
         if ($existingPrediction) {
             // If a prediction already exists for the user, update it
@@ -48,7 +48,7 @@ class PredictionController extends Controller
             // If no prediction exists for the user, create a new one
             $predictionData['user_id'] = $user->id;
             $prediction = Prediction::create($predictionData);
-            return response()->json(['success' => true, 'data' => new PredictionResource($existingPrediction)]);
+            return response()->json(['success' => true, 'data' => new PredictionResource($prediction)]);
         }
     }
 
