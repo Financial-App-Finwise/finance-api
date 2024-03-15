@@ -44,7 +44,7 @@ class BudgetPlanController extends Controller
     
         $budgetPlansWithCount = $budgetPlans->map(function ($budgetPlan) {
             
-            $groupedTransactions = $budgetPlan->transactions->groupBy(function ($transaction) use ($today, $yesterday) {
+            $groupedTransactions = $budgetPlan->transactions->groupBy(function ($transaction) {
                 $formattedDate = \Carbon\Carbon::parse($transaction->date)->toDateString();
                 if ($formattedDate === $today) {
                     return 'today';
