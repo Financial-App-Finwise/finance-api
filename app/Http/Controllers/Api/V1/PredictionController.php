@@ -75,7 +75,7 @@ class PredictionController extends Controller
     {
         // Check if the model is retrieved successfully
         if (!$prediction) {
-            return response()->json(['success' => false, 'message' => 'Prediction not found'], Response::HTTP_NOT_FOUND);
+            return response()->json(['success' => false, 'message' => 'Prediction not found']);
         }
 
         // Add user id to the request
@@ -83,14 +83,14 @@ class PredictionController extends Controller
 
         // Check if the prediction belongs to the user
         if ($prediction->userID != $user->id) {
-            return response()->json(['success' => false, 'message' => 'You are not authorized to update this prediction'], Response::HTTP_UNAUTHORIZED);
+            return response()->json(['success' => false, 'message' => 'You are not authorized to update this prediction']);
         }
 
         // Logic to update a prediction by ID
         try {
             $prediction->update($request->validated());
         } catch (Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Failed to update prediction'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response()->json(['success' => false, 'message' => 'Failed to update prediction']);
         }
 
         return response()->json([
@@ -110,7 +110,7 @@ class PredictionController extends Controller
 
         // Check if the authenticated user is the owner of the prediction
         if ($prediction->userID !== $user->id) {
-            return response()->json(['success' => false, 'message' => 'You are not authorized to delete this prediction'], Response::HTTP_FORBIDDEN);
+            return response()->json(['success' => false, 'message' => 'You are not authorized to delete this prediction']);
         }
 
         // Logic to delete a prediction by ID
