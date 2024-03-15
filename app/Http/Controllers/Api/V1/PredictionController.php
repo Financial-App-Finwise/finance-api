@@ -99,8 +99,18 @@ class PredictionController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Prediction $prediction)
     {
-        //
+        $user = auth()->user();
+
+        // Check if the authenticated user is the owner of the prediction
+        if ($prediction->user_id !== $user->id) {
+            return response()->json(['success' => false, 'message' => 'You are not authorized to delete this prediction'], Response::HTTP_FORBIDDEN);
+        }
+
+        // Logic to delete a prediction by ID
+        $prediction->delete();
+
+        return response()->json(['success' => true, 'message' => 'Prediction deleted successfully']);
     }
 }

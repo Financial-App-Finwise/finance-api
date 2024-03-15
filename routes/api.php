@@ -72,6 +72,14 @@ Route::group([
         Route::patch('/', [Api\V1\UserOnboardingInfoController::class, 'update']);
     });
 
+    Route::group(['prefix' => 'predictions'], function () {
+        Route::get('/', [Api\V1\PredictionController::class, 'index']);
+        Route::post('/create', [Api\V1\PredictionController::class, 'store']);
+        Route::put('/', [Api\V1\PredictionController::class, 'update']);
+        Route::patch('/', [Api\V1\PredictionController::class, 'update']);
+        Route::delete('/{prediction}', [Api\V1\PredictionController::class, 'destroy']);
+    });
+
     Route::group(['prefix' => 'upcomingbills'], function () {
         Route::get('/', [Api\V1\UpcomingbillController::class, 'index']);
         Route::get('/{upcomingbill}', [Api\V1\UpcomingbillController::class, 'show']);
