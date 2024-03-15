@@ -42,9 +42,9 @@ class BudgetPlanController extends Controller
         $totalBudgetPlans = $budgetPlans->count();
         $plannedBudgets = (float) $budgetPlans->sum('amount');
     
-        $budgetPlansWithCount = $budgetPlans->map(function ($budgetPlan) {
-            
-            $groupedTransactions = $budgetPlan->transactions->groupBy(function ($transaction) {
+        $budgetPlansWithTransactions = $budgetPlans->map(function ($budgetPlan) use ($today, $yesterday) {
+            // Group transactions with the same date into an array
+            $groupedTransactions = $budgetPlan->transactions->groupBy(function ($transaction) use ($today, $yesterday) {
                 $formattedDate = \Carbon\Carbon::parse($transaction->date)->toDateString();
                 if ($formattedDate === $today) {
                     return 'today';
@@ -187,6 +187,8 @@ class BudgetPlanController extends Controller
                             return Carbon::parse($date->date)->format('m');
                         });
     
+
+        return $budgetPlans;
         $formattedData = [];
     
         // Loop through all months (1 to 12) and set count to 0 if no items found
