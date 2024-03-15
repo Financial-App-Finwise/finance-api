@@ -46,7 +46,7 @@ class PredictionController extends Controller
             return response()->json(['success' => true, 'data' => new PredictionResource($existingPrediction)]);
         } else {
             // If no prediction exists for the user, create a new one
-            $predictionData['user_id'] = $user->id;
+            $predictionData['userID'] = $user->id;
             $prediction = Prediction::create($predictionData);
             return response()->json(['success' => true, 'data' => new PredictionResource($prediction)]);
         }
@@ -109,7 +109,7 @@ class PredictionController extends Controller
         $user = auth()->user();
 
         // Check if the authenticated user is the owner of the prediction
-        if ($prediction->user_id !== $user->id) {
+        if ($prediction->userID !== $user->id) {
             return response()->json(['success' => false, 'message' => 'You are not authorized to delete this prediction'], Response::HTTP_FORBIDDEN);
         }
 
