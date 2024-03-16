@@ -44,8 +44,7 @@ class BudgetPlanController extends Controller
         
         
         $budgetPlans->getCollection()->transform(function ($budgetPlan) {
-            $transactions = Transaction::where('userID', $user->id)
-                            ->where('budgetplanID', $budgetPlan->id);
+            $transactions = Transaction::where('budgetplanID', $budgetPlan->id);
 
             $budgetPlan['transactions_count'] = $transactions->count();
             $budgetPlan['spent'] = $transactions->sum('amount');
