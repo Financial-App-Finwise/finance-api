@@ -28,6 +28,8 @@ class GoalResource extends JsonResource
             'monthlyContribution' => (float)$this->monthlyContribution,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            'transactionCount' => $this->when(isset($this->transactionCount), $this->transactionCount), // Include transactionCount if set
+            'transaction' => new TransactionResource($this->whenLoaded('transaction')),
             ];
     }
 }

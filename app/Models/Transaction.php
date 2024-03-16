@@ -41,5 +41,14 @@ class Transaction extends Model
         return $this->belongsTo(UpcomingBill::class, 'upcomingbillID');
     }
 
+    public function transactionGoal()
+    {
+        return $this->hasOne(TransactionGoal::class, 'transactionID');
+    }
+    public function goal()
+    {
+        return $this->belongsTo(Goal::class, 'goalID'); 
+    }
+
 }
 

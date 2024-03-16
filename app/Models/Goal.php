@@ -20,11 +20,21 @@ class Goal extends Model
         'endDate',
         'monthlyContribution',
     ];
-    
-    public function user(){
+
+    public function user()
+    {
         return $this->belongsTo(User::class);
     }
-    public function UpcomingBill(){
-        return $this->belongsTo(UpcomingBill::class);
+
+    public function transactionGoal()
+    {
+        return $this->hasMany(TransactionGoal::class, 'goalID', 'id');
     }
+
+    public function transactions()
+    {
+        return $this->hasManyThrough(Transaction::class, TransactionGoal::class, 'goalID', 'id', 'id', 'transactionID');
+    }
+
+
 }

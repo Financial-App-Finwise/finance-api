@@ -6,6 +6,11 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Models\Category;
 use App\Models\UpcomingBill;
+use App\Models\BudgetPlan;
+use App\Models\TransactionGoal;
+
+
+
 
 
 class TransactionResource extends JsonResource
@@ -128,6 +133,17 @@ class TransactionResource extends JsonResource
             'isRecurring' => $this->budgetPlan->isRecurring,
         ] : null;
 
+        $transactionGoal = $this->transactionGoal ? [
+            'id' => $this->transactionGoal->id,
+            'ContributionAmount' => (float) $this->transactionGoal->ContributionAmount,
+            'goal' => $this->transactionGoal->goal ? [
+                'id' => $this->transactionGoal->goal->id,
+                'name' => $this->transactionGoal->goal->name,
+                'amount' => $this->transactionGoal->goal->amount,
+                'remainingSave' => $this->transactionGoal->goal->remainingSave,
+            ] : null,
+        ] : null;
+
         return [
             'id' => $this->id,
             'userID' => $this->userID,
@@ -140,6 +156,7 @@ class TransactionResource extends JsonResource
             'expenseType' => $this->expenseType,
             'date' => $this->date,
             'note' => $this->note,
+            'transactionGoal' => $transactionGoal,
         ];
     }
 }

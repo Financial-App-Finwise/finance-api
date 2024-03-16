@@ -3,17 +3,21 @@
 namespace App\Http\Controllers\Api\V1;
 
 use Illuminate\Http\Request;
+
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\StoreGoalRequest;
 use App\Http\Requests\V1\UpdateGoalRequest;
 
 use App\Models\User;
 use App\Models\Goal;
+use App\Models\TransactionGoal;
 use App\Http\Resources\V1\GoalResource;
 use App\Http\Resources\V1\GoalCollection;
 
 use App\Filters\V1\GoalFilter;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+
 
 
 class GoalController extends Controller
@@ -101,10 +105,15 @@ class GoalController extends Controller
             return $months;
         }
 
-        // Fetch paginated goals if year is not provided
+        //Fetch paginated goals if year is not provided
         $goals = $query->orderBy('id', 'desc')->paginate();
-        //'Total SMART Goal' => $totalSmartGoals,
-        return new GoalCollection($goals->appends($request->query()));    
+
+        // Retrieve transaction counts for each goal
+        foreach ($goals as $goal) {
+            $transactionCount = $goal->transactionGoal()->count();
+            $goal->transactionCount = $transactionCount; // Add transaction count to each goal object
+        }
+        return new GoalCollection($goals->appends($request->query()));
 
     }
 
@@ -161,10 +170,10 @@ class GoalController extends Controller
             // Additional validation logic
             if ($validatedData['setDate'] == 0) {
                 // Ensure that startDate and endDate are null or not present when setDate is 0
-                if (!isset($validatedData['startDate']) && !isset($validatedData['endDate'])) {
+                if (!isset ($validatedData['startDate']) && !isset ($validatedData['endDate'])) {
 
                     // Validate monthly contribution
-                    if (!isset($validatedData['monthlyContribution'])) {
+                    if (!isset ($validatedData['monthlyContribution'])) {
                         throw new \Exception('Monthly contribution is required when set date is disabled.');
                     }
                     // Set startDate as currentDate
@@ -175,22 +184,22 @@ class GoalController extends Controller
                     $validatedData['endDate'] = $endDate;
 
                     //$goal->update(['startDate' => null, 'endDate' => null]); // Update startDate and endDate to null
-                } elseif (isset($validatedData['startDate']) || isset($validatedData['endDate'])) {
+                } elseif (isset ($validatedData['startDate']) || isset ($validatedData['endDate'])) {
                     throw new \Exception('Start date and end date must be null or not present when set date is disabled.');
                 }
             } else {
                 //Ensure that startDate and endDate are present and valid if setDate is 1
-                if ($validatedData['setDate'] == 1 && (!isset($validatedData['startDate']) || !isset($validatedData['endDate']))) {
+                if ($validatedData['setDate'] == 1 && (!isset ($validatedData['startDate']) || !isset ($validatedData['endDate']))) {
                     throw new \Exception('Start date and end date are required when set date is enabled.');
                 }
 
                 // Check if monthlyContribution is provided when setDate is 1
-                if (isset($validatedData['monthlyContribution'])) {
+                if (isset ($validatedData['monthlyContribution'])) {
                     throw new \Exception('Monthly contribution should not be provided when set date is enabled.');
                 }
 
                 // Calculate monthly contribution if needed
-                if (!isset($validatedData['monthlyContribution'])) {
+                if (!isset ($validatedData['monthlyContribution'])) {
                     // Calculate remaining months
                     $endDate = Carbon::parse($validatedData['endDate']);
                     $startDate = Carbon::parse($validatedData['startDate']);
@@ -259,10 +268,79 @@ class GoalController extends Controller
     /**
      * Display the specified resource.
      */
+
     public function show(Goal $goal)
     {
-        // Logic to get a specific goal by ID
-        return response()->json($goal);
+        $filter = request('filter', null);
+
+        // Load transactions relationship and apply sorting based on the request
+        $transactions = $goal->transactions();
+
+        switch ($filter) {
+            case 'recently':
+                $transactions = $transactions->orderByDesc('date');
+                break;
+            case 'earliest':
+                $transactions = $transactions->orderBy('date');
+                break;
+            case 'lowest':
+                $transactions = $transactions->orderBy('amount');
+                break;
+            case 'highest':
+                $transactions = $transactions->orderByDesc('amount');
+                break;
+            // 'all' or unknown filters will include all transactions
+            default:
+                break;
+        }
+
+        // Now, retrieve the sorted transactions
+        $sortedTransactions = $transactions->get();
+
+        // Group transactions with the same date into an array
+        $groupedTransactions = $sortedTransactions->groupBy(function ($transaction) {
+            // Format the date to only include the date portion
+            $formattedDate = \Carbon\Carbon::parse($transaction->date)->toDateString();
+
+            // Determine if it's today, yesterday, or another day
+            if ($formattedDate === \Carbon\Carbon::now()->toDateString()) {
+                return 'today';
+            } elseif ($formattedDate === \Carbon\Carbon::yesterday()->toDateString()) {
+                return 'yesterday';
+            } else {
+                return $formattedDate;
+            }
+        });
+
+        // Cast "amount" and other money-related values to float
+        $goal['amount'] = (float) $goal['amount'];
+        $goal['transactions'] = $groupedTransactions;
+        $goal['transactions_count'] = (int) $sortedTransactions->count();
+
+        // Add the code to retrieve last 6 months contribution amounts
+        $sixMonthsAgo = Carbon::now()->subMonths(6);
+
+        $contributionAmountsLast6Months = $goal->transactions()
+            ->join('transaction_goals', 'transactions.id', '=', 'transaction_goals.transactionID')
+            ->where('transactions.date', '>=', $sixMonthsAgo)
+            ->groupBy(DB::raw('YEAR(transactions.date)'), DB::raw('MONTH(transactions.date)'))
+            ->orderBy('transactions.date')
+            ->get([
+                DB::raw('DATE_FORMAT(transactions.date, "%Y-%m") as month_year'),
+                DB::raw('SUM(transaction_goals.ContributionAmount) as totalContribution')
+            ]);
+
+        // Transform the result to map month names to contribution amounts
+        $contributionAmountsLast6MonthsFormatted = $contributionAmountsLast6Months->mapWithKeys(function ($item) {
+            $date = Carbon::createFromFormat('Y-m', $item->month_year);
+            return [$date->format('F Y') => $item->totalContribution];
+        });
+
+        // Add the contribution amounts to the response data
+        $goal['contribution_amounts_last_6_months'] = $contributionAmountsLast6MonthsFormatted;
+
+
+        return response()->json(['success' => 'true', 'data' => $goal]);
     }
 
     /**
@@ -339,10 +417,10 @@ class GoalController extends Controller
             // Additional validation logic
             if ($validatedData['setDate'] == 0) {
                 // Ensure that startDate and endDate are null or not present when setDate is 0
-                if (!isset($validatedData['startDate']) && !isset($validatedData['endDate'])) {
+                if (!isset ($validatedData['startDate']) && !isset ($validatedData['endDate'])) {
 
                     // Validate monthly contribution
-                    if (!isset($validatedData['monthlyContribution'])) {
+                    if (!isset ($validatedData['monthlyContribution'])) {
                         throw new \Exception('Monthly contribution is required when set date is disabled.');
                     }
                     $goal->update(['startDate' => null, 'endDate' => null]); // Update startDate and endDate to null
@@ -354,21 +432,21 @@ class GoalController extends Controller
                     $endDate = Carbon::now()->addMonths(ceil($remainingSave / $monthlyContribution))->toDateString();
                     $validatedData['endDate'] = $endDate;
 
-                } elseif (isset($validatedData['startDate']) || isset($validatedData['endDate'])) {
+                } elseif (isset ($validatedData['startDate']) || isset ($validatedData['endDate'])) {
                     throw new \Exception('Start date and end date must be null or not present when set date is disabled.');
                 }
             } else {
                 //Ensure that startDate and endDate are present and valid if setDate is 1
-                if ($validatedData['setDate'] == 1 && (!isset($validatedData['startDate']) || !isset($validatedData['endDate']))) {
+                if ($validatedData['setDate'] == 1 && (!isset ($validatedData['startDate']) || !isset ($validatedData['endDate']))) {
                     throw new \Exception('Start date and end date are required when set date is enabled.');
                 }
 
                 // Check if monthlyContribution is provided when setDate is 1
-                if (isset($validatedData['monthlyContribution'])) {
+                if (isset ($validatedData['monthlyContribution'])) {
                     throw new \Exception('Monthly contribution should not be provided when set date is enabled.');
                 }
                 // Calculate monthly contribution if needed
-                if (!isset($validatedData['monthlyContribution'])) {
+                if (!isset ($validatedData['monthlyContribution'])) {
                     // Calculate remaining months
                     $endDate = Carbon::parse($validatedData['endDate']);
                     $startDate = Carbon::parse($validatedData['startDate']);

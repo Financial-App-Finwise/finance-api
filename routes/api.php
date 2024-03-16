@@ -92,6 +92,7 @@ Route::group([
     Route::group(['prefix' => 'goals'], function () {
         Route::get('/', [Api\V1\GoalController::class, 'index']);
         Route::get('/{goal}', [Api\V1\GoalController::class, 'show']);
+        Route::get('/{goal}/transactions', [Api\V1\GoalController::class, 'show']);
         Route::post('/', [Api\V1\GoalController::class, 'store']);
         Route::put('/{goal}', [Api\V1\GoalController::class, 'update']);
         Route::patch('/{goal}', [Api\V1\GoalController::class, 'update']);

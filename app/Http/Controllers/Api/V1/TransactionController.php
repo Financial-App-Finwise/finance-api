@@ -164,6 +164,7 @@ class TransactionController extends Controller
 
                 // Deduct the contribution amount from the remainingSave column of the goal
                 $goal->remainingSave -= $contributionAmount;
+                $goal->currentSave += $contributionAmount;
                 $goal->save();
 
                 // Deduct the contribution amount from the original transaction amount
