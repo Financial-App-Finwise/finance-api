@@ -43,8 +43,9 @@ class BudgetPlanController extends Controller
         $budgetPlans['planned_budgets'] = (float) $budgetPlansQuery->sum('amount');
         
         
-        $budgetPlans->getCollection()->transform(function ($budgetPlan) use ($today, $yesterday) {
-            $transactions = $budgetPlan->transactions ?? collect();
+        $budgetPlans->getCollection()->transform(function ($budgetPlan) {
+            $transactions = Transaction::where('userID', $user->id)
+                            ->where('budgetplanID', $budgetPlan->id);
 
             $budgetPlan['transactions_count'] = $transactions->count();
             $budgetPlan['spent'] = $transactions->sum('amount');
