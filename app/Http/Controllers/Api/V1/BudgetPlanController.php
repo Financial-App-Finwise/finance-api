@@ -38,6 +38,8 @@ class BudgetPlanController extends Controller
             $budgetPlansQuery->where('isMonthly', $isMonthlyFilter);
         }
 
+        return $budgetPlansQuery;
+
         $budgetPlans = $budgetPlansQuery->orderBy('date', 'asc')->get();
     
         $totalBudgetPlans = $budgetPlans->count();
