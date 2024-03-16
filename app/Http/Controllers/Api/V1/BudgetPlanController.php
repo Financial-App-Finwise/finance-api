@@ -31,7 +31,8 @@ class BudgetPlanController extends Controller
         $budgetPlansQuery = BudgetPlan::with('transactions')
             ->where('userID', $user->id)
             ->whereYear('date', $year)
-            ->whereMonth('date', $month);
+            ->whereMonth('date', $month)
+            ->get();
     
         if ($isMonthlyFilter !== null) {
             $budgetPlansQuery->where('isMonthly', $isMonthlyFilter);
