@@ -14,7 +14,6 @@ class StoreUserOnboardingInfoRequest extends FormRequest
     public function rules()
     {
         return [
-            'sessionID' => 'uuid',
             'userID' => 'exists:users,id',
             'gender' => 'string|max:50',
             'age' => 'integer',

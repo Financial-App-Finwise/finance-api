@@ -29,6 +29,7 @@ class UpcomingBill extends Model
     public function upcomingbill(){
         return $this->belongsTo(Goal::class);
     }
+    
     public function category()
     {
         return $this->belongsTo(Category::class, 'categoryID');

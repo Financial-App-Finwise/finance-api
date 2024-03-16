@@ -24,43 +24,6 @@ class UserOnboardingInfoController extends Controller
         return response()->json(['success' => true, 'data' => UserOnboardingInfoResource::collection($userOnboardingInfo)]);
     }
 
-    public function store(StoreUserOnboardingInfoRequest $request)
-    {
-        // Validate the request
-        $validatedData = $request->validated();
-    
-        // User is not authenticated, generate a unique identifier for the onboarding session
-        $onboardingSessionId = Str::uuid();
-
-        // Create the UserOnboardingInfo record without associating it with a user
-        $userOnboardingInfo = UserOnboardingInfo::create(array_merge($validatedData, ['sessionID' => $onboardingSessionId]));
-
-        // Add data to MyFinance model without associating it with a user
-        MyFinance::create(['sessionID' => $onboardingSessionId, 'totalbalance' => $validatedData['net_worth'], 'currencyID' => $validatedData['currencyID']]);
-
-        // Extract categories and amounts from the validated data
-        $categories = $validatedData['categories'] ?? [];
-        $parentCategories = $validatedData['parentCategories'] ?? [];
-
-        foreach ($categories as $category) {
-            OnboardingExpenseCategory::create([
-                'onboardingID' => $userOnboardingInfo->id,
-                'categoryID' => $category['categoryID']
-            ]);
-        }
-
-        foreach ($parentCategories as $parentCategory) {
-            OnboardingExpenseCategory::create([
-                'onboardingID' => $userOnboardingInfo->id,
-                'parentID' => $parentCategory['parentID'],
-                'amount' => $parentCategory['amount']
-            ]);
-        }
-    
-        // Return the resource
-        return response()->json(['success' => true, 'message' => 'User onboarding information stored successfully.', 'data' => new UserOnboardingInfoResource($userOnboardingInfo)]);
-    }
-
     public function create(StoreUserOnboardingInfoRequest $request)
     {
         $validatedData = $request->validated();
@@ -134,5 +97,4 @@ class UserOnboardingInfoController extends Controller
             return response()->json(['success' => false, 'message' => 'User onboarding information not found.'], 404);
         }
     }
-    
 }

@@ -33,13 +33,6 @@ class AuthController extends Controller
             ]
         ));
 
-        $sessionID = $request->input('sessionID');
-
-        if (!empty($sessionID)) {
-            MyFinance::where('sessionID', $sessionID)->update(['userID' => $user->id, 'sessionID' => null]);
-            UserOnboardingInfo::where('sessionID', $sessionID)->update(['userID' => $user->id, 'sessionID' => null]);
-        }  
-
         $data['code'] = $code;
         $data['email'] = $request->email;
         $data['title'] = "Verifying mail";

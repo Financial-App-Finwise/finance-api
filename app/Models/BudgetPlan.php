@@ -22,16 +22,21 @@ class BudgetPlan extends Model
     public function user(){
         return $this->belongsTo(User::class);
     }
+
     public function transactions()
     {
         return $this->hasMany(Transaction::class, 'budgetplanID');
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class, 'categoryID');
     }
 
     public function toArray()
     {
         $array = parent::toArray();
         $array['amount'] = (float) $array['amount'];
-
         return $array;
     }
 }

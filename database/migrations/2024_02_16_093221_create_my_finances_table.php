@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('my_finances', function (Blueprint $table) {
             $table->id();
-            $table->uuid('sessionID')->nullable();
             $table->unsignedBigInteger('userID')->nullable();
             $table->decimal('totalbalance', 10, 2)->default(0);
             $table->unsignedBigInteger('currencyID');
