@@ -298,18 +298,22 @@ class GoalController extends Controller
         $sortedTransactions = $transactions->get();
 
         // Group transactions with the same date into an array
-        $groupedTransactions = $sortedTransactions->groupBy(function ($transaction) {
-            // Format the date to only include the date portion
-            $formattedDate = \Carbon\Carbon::parse($transaction->date)->toDateString();
+        // $groupedTransactions = $sortedTransactions->groupBy(function ($transaction) {
+        //     // Format the date to only include the date portion
+        //     $formattedDate = \Carbon\Carbon::parse($transaction->date)->toDateString();
 
-            // Determine if it's today, yesterday, or another day
-            if ($formattedDate === \Carbon\Carbon::now()->toDateString()) {
-                return 'today';
-            } elseif ($formattedDate === \Carbon\Carbon::yesterday()->toDateString()) {
-                return 'yesterday';
-            } else {
-                return $formattedDate;
-            }
+        //     // Determine if it's today, yesterday, or another day
+        //     if ($formattedDate === \Carbon\Carbon::now()->toDateString()) {
+        //         return 'today';
+        //     } elseif ($formattedDate === \Carbon\Carbon::yesterday()->toDateString()) {
+        //         return 'yesterday';
+        //     } else {
+        //         return $formattedDate;
+        //     }
+        // });
+
+        $groupedTransactions = $sortedTransactions->groupBy(function ($transaction) {
+            return [$transaction->column1, $transaction->column2];
         });
 
         // Cast "amount" and other money-related values to float
