@@ -36,8 +36,8 @@ class BudgetPlanController extends Controller
         if ($isMonthlyFilter !== null) {
             $budgetPlansQuery->where('isMonthly', $isMonthlyFilter);
         }
-    
-        $budgetPlans = $budgetPlansQuery->orderBy('date', 'asc')->get();
+
+        $budgetPlans = $budgetPlansQuery->orderBy('date', 'asc')->paginate();
     
         $totalBudgetPlans = $budgetPlans->count();
         $plannedBudgets = (float) $budgetPlans->sum('amount');
