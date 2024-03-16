@@ -39,8 +39,8 @@ class BudgetPlanController extends Controller
 
         $budgetPlans = $budgetPlansQuery->orderBy('date', 'asc')->paginate();
 
-        $budgetPlans['total_budgets'] = $budgetPlansQuery->get()->count();
-        $budgetPlans['planned_budgets'] = (float) $budgetPlansQuery->get()->sum('amount');
+        $budgetPlans['total_budgets'] = $budgetPlans->total();
+        $budgetPlans['planned_budgets'] = (float) $budgetPlansQuery->sum('amount');
     
         $budgetPlans->getCollection()->transform(function ($budgetPlan) use ($today, $yesterday) {
             $budgetPlan['transactions_count'] = (int) $budgetPlan['transactions']->count();
