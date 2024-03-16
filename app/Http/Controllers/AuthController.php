@@ -11,7 +11,6 @@ use App\Http\Requests\V1\ResetPasswordRequest;
 use App\Http\Requests\V1\ForgotPasswordCodeRequest;
 use App\Http\Requests\V1\ForgotPasswordResetRequest;
 use App\Models\User;
-use App\Models\ApiSession;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -88,14 +87,6 @@ class AuthController extends Controller
         if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
             $user = Auth::user();
             $token = $user->createToken('auth-token')->plainTextToken;
-
-            $session = ApiSession::firstOrNew([
-                'device_type' => $request->device_type
-            ]);
-    
-            $session->user_id = $user->id;
-            $session->api_token = $token;
-            $session->save();
 
             return response()->json([
                 'success' => 'true',
