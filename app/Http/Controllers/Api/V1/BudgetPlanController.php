@@ -31,13 +31,14 @@ class BudgetPlanController extends Controller
         $budgetPlansQuery = BudgetPlan::with('transactions')
             ->where('userID', $user->id)
             ->whereYear('date', $year)
-            ->whereMonth('date', $month);
+            ->whereMonth('date', $month)
+            ->paginate(10);
     
         if ($isMonthlyFilter !== null) {
             $budgetPlansQuery->where('isMonthly', $isMonthlyFilter);
         }
 
-        $budgetPlans = $budgetPlansQuery->orderBy('date', 'asc')->paginate();
+        $budgetPlans = $budgetPlansQuery->orderBy('date', 'asc')->get();
     
         $totalBudgetPlans = $budgetPlans->count();
         $plannedBudgets = (float) $budgetPlans->sum('amount');
