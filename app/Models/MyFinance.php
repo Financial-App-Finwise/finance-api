@@ -29,7 +29,6 @@ class MyFinance extends Model
     {
         $array = parent::toArray();
         $array['totalbalance'] = (float) $array['totalbalance'];
-
         return $array;
     }
 }

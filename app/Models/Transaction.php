@@ -45,6 +45,7 @@ class Transaction extends Model
     {
         return $this->hasOne(TransactionGoal::class, 'transactionID');
     }
+    
     public function goal()
     {
         return $this->belongsTo(Goal::class, 'goalID'); 

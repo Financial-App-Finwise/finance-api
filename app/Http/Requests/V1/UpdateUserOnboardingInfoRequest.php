@@ -15,7 +15,6 @@ class UpdateUserOnboardingInfoRequest extends FormRequest
     {
         return [
             'userID' => 'exists:users,id',
-            'sessionID' => 'uuid',
             'gender' => 'string|max:50',
             'age' => 'integer',
             'marital_status' => 'string|max:50',

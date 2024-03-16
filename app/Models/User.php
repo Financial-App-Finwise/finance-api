@@ -50,61 +50,39 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    public function getJWTCustomClaims()
+    {
+        return [];
+    }
+
+    public function categories()
+    {
+        return $this->hasMany(Category::class, 'userID');
+    }
+
+    public function goals()
+    {
+        return $this->hasMany(Goal::class, 'userID');
+    }
+
+    public function upcoming_bills()
+    {
+        return $this->hasMany(UpcomingBill::class, 'userID');
+    }
+
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
     
-
-public function getJWTIdentifier()
-{
-    return $this->getKey();
+    public function transactiongoals()
+    {
+        return $this->hasMany(TransactionGoal::class);
+    }
 }
-
-public function getJWTCustomClaims()
-{
-    return [];
-}
-
-public function categories()
-{
-    return $this->hasMany(Category::class, 'userID');
-}
-
-public function goals()
-{
-    return $this->hasMany(Goal::class, 'userID');
-}
-
-public function upcoming_bills()
-{
-    return $this->hasMany(UpcomingBill::class, 'userID');
-}
-public function transactions()
-{
-    return $this->hasMany(Transaction::class);
-}
-public function transactiongoals()
-{
-    return $this->hasMany(TransactionGoal::class);
-}
-}
-
-// class User extends Model
-// {
-//     use HasFactory;
-
-//     public function parentcategories(){
-//         //return $this->hasMany(Category::class);
-//         return $this->hasMany(ParentCategory::class, 'userID');
-//     }
-//     public function categories(){
-//         //return $this->hasMany(Category::class);
-//         return $this->hasMany(Category::class, 'userID');
-//     }
-//     public function goals(){
-//         return $this->hasMany(Goal::class);
-//     }
-//     public function upcomingbills(){
-//         return $this->hasMany(UpcomingBill::class);
-//     }
-//     public function transactions(){
-//         return $this->hasMany(Transaction::class);
-//     }
-// }
