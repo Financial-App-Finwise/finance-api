@@ -20,9 +20,6 @@ class BudgetPlanController extends Controller
      */
     public function index(string $year, string $month)
     {
-        $today = now()->toDateString();
-	    $yesterday = now()->subDay()->toDateString();
-
         // get user id
         $user = auth()->user();
     
@@ -36,32 +33,39 @@ class BudgetPlanController extends Controller
         if ($isMonthlyFilter !== null) {
             $budgetPlansQuery->where('isMonthly', $isMonthlyFilter);
         }
-
-        $budgetPlans = $budgetPlansQuery->orderBy('date', 'asc')->paginate();
-
-        $budgetPlans['total_budgets'] = $budgetPlans->total();
-        $budgetPlans['planned_budgets'] = (float) $budgetPlansQuery->sum('amount');
-        
-        
-        $budgetPlans->getCollection()->map(function ($budgetPlan) {
-            $transactions = Transaction::where('budgetplanID', $budgetPlan->id)->get();
-
-            $budgetPlan['transactions_count'] = $transactions->count();
-            $budgetPlan['spent'] = $transactions->sum('amount');
-            $budgetPlan['remaining_amount'] = $budgetPlan->amount - $budgetPlan['spent'];
+    
+        $budgetPlans = $budgetPlansQuery->orderBy('date', 'asc')->get();
+    
+        $totalBudgetPlans = $budgetPlans->count();
+        $plannedBudgets = (float) $budgetPlans->sum('amount');
+    
+        $budgetPlansWithCount = $budgetPlans->map(function ($budgetPlan) {
+            $budgetPlan['transactions_count'] = (int) $budgetPlan->transactions->count();
+            $budgetPlan['spent'] = (float) $budgetPlan->transactions->sum('amount');
+            $budgetPlan['remaining_amount'] = (float) ($budgetPlan->amount - $budgetPlan['spent']);
             return $budgetPlan;
         });
-        
-        
 
-        $budgetPlans['spent'] = (float) Transaction::where('userID', $user->id)
+
+    
+        $spent = (float) Transaction::where('userID', $user->id)
             ->whereNotNull('budgetplanID')
             ->sum('amount');
     
-        $budgetPlans['available'] = (float) ($budgetPlans['planned_budgets'] - $budgetPlans['spent']);
-        $budgetPlans['over_budget'] = (float) (($budgetPlans['spent'] > $budgetPlans['planned_budgets']) ? $budgetPlans['spent'] - $budgetPlans['planned_budgets'] : 0);
+        $available = (float) ($plannedBudgets - $spent);
+        $overBudget = (float) (($spent > $plannedBudgets) ? $spent - $plannedBudgets : 0);
     
-        return $budgetPlans;
+        return response()->json([
+            'success' => 'true',
+            'data' => [
+                'total_budgets' => $totalBudgetPlans,
+                'available' => $available,
+                'spent' => $spent,
+                'planned_budgets' => $plannedBudgets,
+                'over_budget' => $overBudget,
+                'budget_plans' => $budgetPlansWithCount
+            ],
+        ]);
     }    
     
     private function getMonthName($monthNumber)
