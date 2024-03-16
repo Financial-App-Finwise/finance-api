@@ -31,8 +31,7 @@ class BudgetPlanController extends Controller
         $budgetPlansQuery = BudgetPlan::with('transactions')
             ->where('userID', $user->id)
             ->whereYear('date', $year)
-            ->whereMonth('date', $month)
-            ->get();
+            ->whereMonth('date', $month);
     
         if ($isMonthlyFilter !== null) {
             $budgetPlansQuery->where('isMonthly', $isMonthlyFilter);
@@ -40,8 +39,8 @@ class BudgetPlanController extends Controller
 
         $budgetPlans = $budgetPlansQuery->orderBy('date', 'asc')->paginate();
 
-        $budgetPlans['total_budgets'] = $budgetPlansQuery->count();
-        $budgetPlans['planned_budgets'] = (float) $budgetPlansQuery->sum('amount');
+        $budgetPlans['total_budgets'] = $budgetPlansQuery->get()->count();
+        $budgetPlans['planned_budgets'] = (float) $budgetPlansQuery->get()->sum('amount');
     
         $budgetPlans->getCollection()->transform(function ($budgetPlan) use ($today, $yesterday) {
             $budgetPlan['transactions_count'] = (int) $budgetPlan['transactions']->count();
