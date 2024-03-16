@@ -37,7 +37,7 @@ class BudgetPlanController extends Controller
             $budgetPlansQuery->where('isMonthly', $isMonthlyFilter);
         }
 
-        $budgetPlans = $budgetPlansQuery->orderBy('date', 'asc')->get();
+        $budgetPlans = $budgetPlansQuery->orderBy('date', 'asc')->paginate();
     
         $totalBudgetPlans = $budgetPlans->count();
         $plannedBudgets = (float) $budgetPlans->sum('amount');
@@ -83,7 +83,7 @@ class BudgetPlanController extends Controller
                 'spent' => $spent,
                 'planned_budgets' => $plannedBudgets,
                 'over_budget' => $overBudget,
-                'budget_plans' => $budgetPlans->paginate()
+                'budget_plans' => $budgetPlans
             ],
         ]);
     }    
