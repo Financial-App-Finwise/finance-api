@@ -54,8 +54,8 @@ class BudgetPlanController extends Controller
             ->whereNotNull('budgetplanID')
             ->sum('amount');
     
-        $budgetPlans['available'] = (float) ($plannedBudgets - $spent);
-        $budgetPlans['over_budget'] = (float) (($spent > $plannedBudgets) ? $spent - $plannedBudgets : 0);
+        $budgetPlans['available'] = (float) ($budgetPlans['planned_budgets'] - $budgetPlans['spent']);
+        $budgetPlans['over_budget'] = (float) (($budgetPlans['spent'] > $budgetPlans['planned_budgets']) ? $budgetPlans['spent'] - $budgetPlans['planned_budgets'] : 0);
     
         return $budgetPlans;
     }    
