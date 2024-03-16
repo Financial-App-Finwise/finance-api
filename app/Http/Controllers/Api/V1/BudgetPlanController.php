@@ -164,13 +164,13 @@ class BudgetPlanController extends Controller
     
         // retrieve budget plans for a specific year and group by month
         $budgetPlans = BudgetPlan::where('userID', $user->id)
-                        ->whereYear('created_at', $year)
-                        ->orderBy('created_at', 'asc')
+                        ->whereYear('date', $year)
+                        ->orderBy('date', 'asc')
                         ->get()
                         ->groupBy(function($date) {
-                            return Carbon::parse($date->created_at)->format('m');
+                            return Carbon::parse($date->date)->format('m');
                         });
-    
+
         $formattedData = [];
     
         // Loop through all months (1 to 12) and set count to 0 if no items found
