@@ -57,7 +57,7 @@ class BudgetPlanController extends Controller
         $budgetPlans['available'] = (float) ($budgetPlans['planned_budgets'] - $budgetPlans['spent']);
         $budgetPlans['over_budget'] = (float) (($budgetPlans['spent'] > $budgetPlans['planned_budgets']) ? $budgetPlans['spent'] - $budgetPlans['planned_budgets'] : 0);
     
-        return $budgetPlans;
+        return BudgetPlanCollection($budgetPlans);
     }    
     
     private function getMonthName($monthNumber)
