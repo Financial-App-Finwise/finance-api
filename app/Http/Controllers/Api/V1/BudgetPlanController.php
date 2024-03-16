@@ -42,7 +42,7 @@ class BudgetPlanController extends Controller
         $totalBudgetPlans = $budgetPlans->count();
         $plannedBudgets = (float) $budgetPlans->sum('amount');
     
-        $budgetPlans = $budgetPlans->map(function ($budgetPlan) use ($today, $yesterday) {
+        $budgetPlans->getCollection()->transform(function ($budgetPlan) use ($today, $yesterday) {
             $budgetPlan['transactions_count'] = (int) count($budgetPlan['transactions']);
             $budgetPlan['spent'] = (float) $budgetPlan->transactions->sum('amount');
             $budgetPlan['remaining_amount'] = (float) ($budgetPlan->amount - $budgetPlan['spent']);
@@ -67,8 +67,6 @@ class BudgetPlanController extends Controller
         });
 
         return $budgetPlans;
-
-
     
         $spent = (float) Transaction::where('userID', $user->id)
             ->whereNotNull('budgetplanID')
