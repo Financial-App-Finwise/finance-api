@@ -41,14 +41,14 @@ class BudgetPlanController extends Controller
 
         $budgetPlans['total_budgets'] = $budgetPlans->total();
         $budgetPlans['planned_budgets'] = (float) $budgetPlansQuery->sum('amount');
-        /*
+        
         $budgetPlans->getCollection()->transform(function ($budgetPlan) use ($today, $yesterday) {
             $budgetPlan['transactions_count'] = $budgetPlan->transactions->count();
             $budgetPlan['spent'] = $budgetPlan->transactions->sum('amount');
             $budgetPlan['remaining_amount'] = $budgetPlan->amount - $budgetPlan['spent'];
             return $budgetPlan;
         });
-        */
+        
 
         $budgetPlans['spent'] = (float) Transaction::where('userID', $user->id)
             ->whereNotNull('budgetplanID')
@@ -57,7 +57,7 @@ class BudgetPlanController extends Controller
         $budgetPlans['available'] = (float) ($budgetPlans['planned_budgets'] - $budgetPlans['spent']);
         $budgetPlans['over_budget'] = (float) (($budgetPlans['spent'] > $budgetPlans['planned_budgets']) ? $budgetPlans['spent'] - $budgetPlans['planned_budgets'] : 0);
     
-        return BudgetPlanCollection($budgetPlans);
+        return new BudgetPlanCollection($budgetPlans);
     }    
     
     private function getMonthName($monthNumber)
