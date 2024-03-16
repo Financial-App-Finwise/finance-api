@@ -43,7 +43,7 @@ class BudgetPlanController extends Controller
         $budgetPlans['planned_budgets'] = (float) $budgetPlansQuery->sum('amount');
     
         $budgetPlans->getCollection()->transform(function ($budgetPlan) use ($today, $yesterday) {
-            $budgetPlan['transactions_count'] = (int) count($budgetPlan['transactions']);
+            $budgetPlan['transactions_count'] = (int) $budgetPlan['transactions']->count();
             $budgetPlan['spent'] = (float) $budgetPlan->transactions->sum('amount');
             $budgetPlan['remaining_amount'] = (float) ($budgetPlan->amount - $budgetPlan['spent']);
 
