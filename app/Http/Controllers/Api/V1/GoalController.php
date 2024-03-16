@@ -317,31 +317,69 @@ class GoalController extends Controller
         $goal['transactions'] = $groupedTransactions;
         $goal['transactions_count'] = (int) $sortedTransactions->count();
 
-        // Add the code to retrieve last 6 months contribution amounts
+
         $sixMonthsAgo = Carbon::now()->subMonths(6);
 
         $contributionAmountsLast6Months = $goal->transactions()
-            ->join('transaction_goals', 'transactions.id', '=', 'transaction_goals.transactionID')
+            ->join('transaction_goals as tg', 'transactions.id', '=', 'tg.transactionID')
+            ->where('tg.goalID', $goal->id) // Filter by goalID of current goal
             ->where('transactions.date', '>=', $sixMonthsAgo)
-            ->groupBy(DB::raw('YEAR(transactions.date)'), DB::raw('MONTH(transactions.date)'))
+            ->groupBy(
+                DB::raw('MONTHNAME(transactions.date)'), // Group by month name
+                'transaction_goals.goalID' // Include goalID in GROUP BY clause
+            )
             ->orderBy('transactions.date')
             ->get([
-                DB::raw('DATE_FORMAT(transactions.date, "%Y-%m") as month_year'),
-                DB::raw('SUM(transaction_goals.ContributionAmount) as totalContribution')
+                DB::raw('MONTHNAME(transactions.date) as month'), // Format month as month name
+                DB::raw('SUM(tg.ContributionAmount) as totalContribution'),
+                'transaction_goals.goalID as laravel_through_key' // Alias the goalID for consistency
             ]);
 
-        // Transform the result to map month names to contribution amounts
-        $contributionAmountsLast6MonthsFormatted = $contributionAmountsLast6Months->mapWithKeys(function ($item) {
-            $date = Carbon::createFromFormat('Y-m', $item->month_year);
-            return [$date->format('F Y') => $item->totalContribution];
+        $transactions = $goal->transactions()->with('goal')->get();
+
+        $transactionContributions = $contributionAmountsLast6Months->map(function ($transaction) {
+            return [
+                'id' => $transaction->id,
+                'userID' => $transaction->userID,
+                'categoryID' => $transaction->categoryID,
+                'isIncome' => $transaction->isIncome,
+                'amount' => $transaction->amount,
+                'hasContributed' => $transaction->hasContributed,
+                'upcomingbillID' => $transaction->upcomingbillID,
+                'budgetplanID' => $transaction->budgetplanID,
+                'expenseType' => $transaction->expenseType,
+                'date' => $transaction->date,
+                'note' => $transaction->note,
+                'transactionGoal' => [
+                    'id' => $transaction->laravel_through_key,
+                    'ContributionAmount' => $transaction->totalContribution, 
+                ]
+            ];
         });
 
         // Add the contribution amounts to the response data
-        $goal['contribution_amounts_last_6_months'] = $contributionAmountsLast6MonthsFormatted;
-
+        $goal['contribution_amounts_last_6_months'] = $contributionAmountsLast6Months;
 
         return response()->json(['success' => 'true', 'data' => $goal]);
     }
+
+    // Now, let's calculate contribution amounts for the last 6 months
+    // $sixMonthsAgo = Carbon::now()->subMonths(6);
+    // $transactionsLast6Months = $goal->transactions()
+    //     ->where('date', '>=', $sixMonthsAgo)
+    //     ->get();
+
+    // $contributionAmountsLast6Months = $transactionsLast6Months->groupBy(function ($transaction) {
+    //     return Carbon::parse($transaction->date)->formatLocalized('%B %Y');
+    // })->map(function ($transactions) {
+    //     // Sum both transaction amounts and contribution amounts in the same month
+    //     $totalAmount = $transactions->sum('amount');
+    //     $totalContribution = $transactions->sum('transactionGoal.ContributionAmount');
+    //     return $totalAmount + $totalContribution;
+    // });
+
+    //$goal['contribution_amounts_last_6_months'] = $contributionAmountsLast6Months;
+
 
     /**
      * Show the form for editing the specified resource.
@@ -498,7 +536,6 @@ class GoalController extends Controller
         } catch (Exception $e) {
             return response()->json(['success' => 'false', 'message' => 'Failed to update Smart Goal'], 500);
         }
-
         return response()->json(['success' => 'true', 'message' => 'Smart Goal updated successfully']);
     }
 
