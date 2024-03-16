@@ -264,107 +264,6 @@ class GoalController extends Controller
         }
     }
 
-
-    /**
-     * Display the specified resource.
-     */
-
-    // public function show(Goal $goal)
-    // {
-    //     $filter = request('filter', null);
-
-    //     // Load transactions relationship and apply sorting based on the request
-    //     $transactions = $goal->transactions();
-
-    //     switch ($filter) {
-    //         case 'recently':
-    //             $transactions = $transactions->orderByDesc('date');
-    //             break;
-    //         case 'earliest':
-    //             $transactions = $transactions->orderBy('date');
-    //             break;
-    //         case 'lowest':
-    //             $transactions = $transactions->orderBy('amount');
-    //             break;
-    //         case 'highest':
-    //             $transactions = $transactions->orderByDesc('amount');
-    //             break;
-    //         // 'all' or unknown filters will include all transactions
-    //         default:
-    //             break;
-    //     }
-
-    //     // Now, retrieve the sorted transactions
-    //     $sortedTransactions = $transactions->get();
-
-    //     // Group transactions with the same date into an array
-    //     $groupedTransactions = $sortedTransactions->groupBy(function ($transaction) {
-    //         // Format the date to only include the date portion
-    //         $formattedDate = \Carbon\Carbon::parse($transaction->date)->toDateString();
-
-    //         // Determine if it's today, yesterday, or another day
-    //         if ($formattedDate === \Carbon\Carbon::now()->toDateString()) {
-    //             return 'today';
-    //         } elseif ($formattedDate === \Carbon\Carbon::yesterday()->toDateString()) {
-    //             return 'yesterday';
-    //         } else {
-    //             return $formattedDate;
-    //         }
-    //     });
-
-    //     // Cast "amount" and other money-related values to float
-    //     $goal['amount'] = (float) $goal['amount'];
-    //     $goal['transactions'] = $groupedTransactions;
-    //     $goal['transactions_count'] = (int) $sortedTransactions->count();
-
-
-    //     $sixMonthsAgo = Carbon::now()->subMonths(6);
-
-    //     $contributionAmountsLast6Months = $goal->transactions()
-    //         ->join('transaction_goals as tg', 'transactions.id', '=', 'tg.transactionID')
-    //         ->where('tg.goalID', $goal->id) // Filter by goalID of current goal
-    //         ->where('transactions.date', '>=', $sixMonthsAgo)
-    //         ->groupBy(
-    //             DB::raw('MONTHNAME(transactions.date)'), // Group by month name
-    //             'transaction_goals.goalID' // Include goalID in GROUP BY clause
-    //         )
-    //         ->orderBy('transactions.date')
-    //         ->get([
-    //             DB::raw('MONTHNAME(transactions.date) as month'), // Format month as month name
-    //             DB::raw('SUM(tg.ContributionAmount) as totalContribution'),
-    //             'transaction_goals.goalID as laravel_through_key' // Alias the goalID for consistency
-    //         ]);
-
-    //     $transactions = $goal->transactions()->with('goal')->get();
-
-    //     $transactionContributions = $contributionAmountsLast6Months->map(function ($transaction) {
-    //         return [
-    //             'id' => $transaction->id,
-    //             'userID' => $transaction->userID,
-    //             'categoryID' => $transaction->categoryID,
-    //             'isIncome' => $transaction->isIncome,
-    //             'amount' => $transaction->amount,
-    //             'hasContributed' => $transaction->hasContributed,
-    //             'upcomingbillID' => $transaction->upcomingbillID,
-    //             'budgetplanID' => $transaction->budgetplanID,
-    //             'expenseType' => $transaction->expenseType,
-    //             'date' => $transaction->date,
-    //             'note' => $transaction->note,
-    //             'transactionGoal' => [
-    //                 'id' => $transaction->laravel_through_key,
-    //                 'ContributionAmount' => $transaction->totalContribution, 
-    //             ]
-    //         ];
-    //     });
-
-    //     // Add the contribution amounts to the response data
-    //     $goal['contribution_amounts_last_6_months'] = $contributionAmountsLast6Months;
-
-    //     return response()->json(['success' => 'true', 'data' => $goal]);
-    // }
-
-
-
     /**
      * Show the form for editing the specified resource.
      */
@@ -457,6 +356,13 @@ class GoalController extends Controller
                 'transaction_goals.goalID as laravel_through_key' // Alias the goalID for consistency
             ]);
 
+        // Calculate the average total contribution
+        $totalContributionSum = $contributionAmountsLast6Months->sum('totalContribution');
+        $averageTotalContribution = $totalContributionSum / $contributionAmountsLast6Months->count();
+
+        // Retrieve the total contribution in the last month
+        $totalContributionLastMonth = $contributionAmountsLast6Months->last()->totalContribution ?? 0;
+
         $transactions = $goal->transactions()->with('goal')->get();
 
         $transactionContributions = $contributionAmountsLast6Months->map(function ($transaction) {
@@ -479,8 +385,10 @@ class GoalController extends Controller
             ];
         });
 
-        // Add the contribution amounts to the response data
+        // Add the contribution amounts to the response data along with average and last month's contribution
         $goal['contribution_amounts_last_6_months'] = $contributionAmountsLast6Months;
+        $goal['average_total_contribution'] = $averageTotalContribution;
+        $goal['total_contribution_last_month'] = $totalContributionLastMonth;
 
         return response()->json(['success' => 'true', 'data' => $goal]);
     }
