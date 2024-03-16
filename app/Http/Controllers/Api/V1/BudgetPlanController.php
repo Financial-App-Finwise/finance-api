@@ -42,7 +42,7 @@ class BudgetPlanController extends Controller
         $budgetPlans['total_budgets'] = $budgetPlans->total();
         $budgetPlans['planned_budgets'] = (float) $budgetPlansQuery->sum('amount');
         
-        
+        /*
         $budgetPlans->getCollection()->transform(function ($budgetPlan) {
             $transactions = Transaction::where('budgetplanID', $budgetPlan->id);
 
@@ -51,6 +51,7 @@ class BudgetPlanController extends Controller
             $budgetPlan['remaining_amount'] = $budgetPlan->amount - $budgetPlan['spent'];
             return $budgetPlan;
         });
+        */
         
         
 
