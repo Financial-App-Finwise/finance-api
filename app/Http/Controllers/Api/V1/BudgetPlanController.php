@@ -43,26 +43,9 @@ class BudgetPlanController extends Controller
         $budgetPlans['planned_budgets'] = (float) $budgetPlansQuery->sum('amount');
     
         $budgetPlans->getCollection()->transform(function ($budgetPlan) use ($today, $yesterday) {
-            // $budgetPlan['transactions_count'] = $budgetPlan->transactions->count();
+            $budgetPlan['transactions_count'] = $budgetPlan->transactions->count();
             $budgetPlan['spent'] = $budgetPlan->transactions->sum('amount');
             $budgetPlan['remaining_amount'] = $budgetPlan->amount - $budgetPlan['spent'];
-
-            // Group transactions with the same date into an array
-            $groupedTransactions = $budgetPlan['transactions']->groupBy(function ($transaction) {
-                // Format the date to only include the date portion
-                $formattedDate = \Carbon\Carbon::parse($transaction->date)->toDateString();
-
-                // Determine if it's today, yesterday, or another day
-                if ($formattedDate === \Carbon\Carbon::now()->toDateString()) {
-                    return 'today';
-                } elseif ($formattedDate === \Carbon\Carbon::yesterday()->toDateString()) {
-                    return 'yesterday';
-                } else {
-                    return $formattedDate;
-                }
-            });
-
-            $budgetPlan['transactions'] = $groupedTransactions;
             return $budgetPlan;
         });
 
