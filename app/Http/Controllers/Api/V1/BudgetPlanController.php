@@ -38,9 +38,7 @@ class BudgetPlanController extends Controller
         }
 
         $budgetPlans = $budgetPlansQuery->orderBy('date', 'asc')->paginate();
-    
-        return $budgetPlans;
-        
+
         $totalBudgetPlans = $budgetPlans->count();
         $plannedBudgets = (float) $budgetPlans->sum('amount');
     
@@ -67,6 +65,8 @@ class BudgetPlanController extends Controller
             $budgetPlan['transactions'] = $groupedTransactions;
             return $budgetPlan;
         });
+
+        return $budgetPlans;
 
 
     
