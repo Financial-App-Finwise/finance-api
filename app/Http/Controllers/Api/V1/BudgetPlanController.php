@@ -39,8 +39,8 @@ class BudgetPlanController extends Controller
 
         $budgetPlans = $budgetPlansQuery->orderBy('date', 'asc')->paginate();
 
-        $totalBudgetPlans = $budgetPlans->count();
-        $plannedBudgets = (float) $budgetPlans->sum('amount');
+        $budgetPlans['total_budgets'] = $budgetPlansQuery->count();
+        $budgetPlans['planned_budgets'] = (float) $budgetPlansQuery->sum('amount');
     
         $budgetPlans->getCollection()->transform(function ($budgetPlan) use ($today, $yesterday) {
             $budgetPlan['transactions_count'] = (int) count($budgetPlan['transactions']);
@@ -66,26 +66,14 @@ class BudgetPlanController extends Controller
             return $budgetPlan;
         });
 
-        return $budgetPlans;
-    
-        $spent = (float) Transaction::where('userID', $user->id)
+        $budgetPlans['spent'] = (float) Transaction::where('userID', $user->id)
             ->whereNotNull('budgetplanID')
             ->sum('amount');
     
-        $available = (float) ($plannedBudgets - $spent);
-        $overBudget = (float) (($spent > $plannedBudgets) ? $spent - $plannedBudgets : 0);
+        $budgetPlans['available'] = (float) ($plannedBudgets - $spent);
+        $budgetPlans['over_budget'] = (float) (($spent > $plannedBudgets) ? $spent - $plannedBudgets : 0);
     
-        return response()->json([
-            'success' => 'true',
-            'data' => [
-                'total_budgets' => $totalBudgetPlans,
-                'available' => $available,
-                'spent' => $spent,
-                'planned_budgets' => $plannedBudgets,
-                'over_budget' => $overBudget,
-                'budget_plans' => $budgetPlans
-            ],
-        ]);
+        return $budgetPlans;
     }    
     
     private function getMonthName($monthNumber)
