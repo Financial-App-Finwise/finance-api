@@ -43,9 +43,9 @@ class BudgetPlanController extends Controller
         $budgetPlans['planned_budgets'] = (float) $budgetPlansQuery->sum('amount');
     
         $budgetPlans->getCollection()->transform(function ($budgetPlan) use ($today, $yesterday) {
-            $budgetPlan['transactions_count'] = (int) $budgetPlan['transactions']->count();
-            $budgetPlan['spent'] = (float) $budgetPlan->transactions->sum('amount');
-            $budgetPlan['remaining_amount'] = (float) ($budgetPlan->amount - $budgetPlan['spent']);
+            $budgetPlan['transactions_count'] = $budgetPlan['transactions']->count();
+            $budgetPlan['spent'] = $budgetPlan->transactions->sum('amount');
+            $budgetPlan['remaining_amount'] = $budgetPlan->amount - $budgetPlan['spent'];
 
             // Group transactions with the same date into an array
             $groupedTransactions = $budgetPlan['transactions']->groupBy(function ($transaction) {
