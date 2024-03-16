@@ -22,25 +22,28 @@ use Carbon\Carbon;
 class MyFinanceController extends Controller
 {
     /**
-     * Display the specified resource.
+     * Display the financial summary including charts and transaction details.
+     *
+     * @return \Illuminate\Http\JsonResponse JSON response containing financial summary data.
      */
     public function show()
     {
-        // get user id
+        // Retrieve the authenticated user's ID
         $user = auth()->user();
 
         // Retrieve filters from the request
         $isIncomeFilter = request('isIncome', null);
         $periodFilter = request('period', null);
 
+        // Retrieve financial data for the user
         $myfinance = MyFinance::where('userID', $user->id)
-            ->with('currency')
-            ->get();
+                        ->with('currency')
+                        ->get();
         $transactions = Transaction::where('userID', $user->id)
-            ->with('category')
-            ->get();
+                        ->with('category')
+                        ->get();
 
-        ////////Bar Chart
+        // Bar Chart: Calculate total income and expenses for the specified period
         if ($periodFilter === 'this_week') {
             // Count total expense and income of each day of the current week
             $currentWeekStart = now()->startOfWeek();
@@ -98,11 +101,11 @@ class MyFinanceController extends Controller
                 });
         }
 
-        ////////Filtered expenses and income based on bar chart
+        // Calculate filtered expenses and income based on the bar chart data
         $filteredExpenses = (float) $totals->sum('total_expense');
         $filteredIncome = (float) $totals->sum('total_income');
 
-        ////////Count all expenses and income
+        // Calculate total expenses and income for all transactions
         $totalExpenses = (float) $transactions->where('isIncome', 0)->sum('amount');
         $totalIncome = (float) $transactions->where('isIncome', 1)->sum('amount');
 
@@ -111,7 +114,7 @@ class MyFinanceController extends Controller
             $transactions = $transactions->where('isIncome', $isIncomeFilter);
         }
 
-        ////////Donut Chart
+        // Donut Chart: Get top transactions grouped by category
         $topTransactions = collect($transactions)->groupBy('categoryID')->map(function ($group) {
             return [
                 'category' => $group[0]->category,
@@ -119,11 +122,12 @@ class MyFinanceController extends Controller
             ];
         })->sortByDesc('amount')->values()->all();
 
-        ///////All Transaction
+        // All Transactions: Group transactions by date
         $groupedTransactions = collect($transactions)->groupBy(function ($transaction) {
             return Carbon::parse($transaction->date)->startOfDay()->format('Y-m-d');
         });
 
+        // Get today's and yesterday's transactions
         $today = Carbon::today()->format('Y-m-d');
         $yesterday = Carbon::yesterday()->format('Y-m-d');
 
@@ -139,7 +143,8 @@ class MyFinanceController extends Controller
                 ->values()
                 ->all(),
         ];
-        
+
+        // Return JSON response containing financial summary data
         return response()->json([
             'success' => 'true',
             'data' => [
@@ -154,34 +159,47 @@ class MyFinanceController extends Controller
             ],
         ]);
     }
+
     
     /**
-     * Display the specified resource.
+     * Display all available currencies.
+     *
+     * @return \Illuminate\Http\JsonResponse JSON response containing data of all available currencies.
      */
     public function show_currency()
     {
         // Retrieve all currencies
         $currencies = Currency::all();
 
+        // Return JSON response containing data of all available currencies
         return response()->json(['success'=> 'true', 'data' => CurrencyResource::collection($currencies)]);
     }
 
-        /**
-     * Show the form for creating a new resource.
+
+    /**
+     * Create a new financial record.
+     *
+     * @param \App\Http\Requests\StoreMyFinanceRequest $request The incoming request containing data for creating a new financial record.
+     * @return \Illuminate\Http\JsonResponse JSON response indicating success or failure of the operation, along with the created financial record.
      */
     public function create(StoreMyFinanceRequest $request)
     {
-        # get user id from jwt token
+        // Retrieve the user ID from the JWT token
         $user = auth()->user();
 
-        // # add user id to the request
+        // Add the user ID to the request data
         $request->merge(['userID' => $user->id]);
 
+        // Create a new financial record using the request data and return JSON response
         return response()->json(['success' => 'true', 'data' => new MyFinanceResource(MyFinance::create($request->all()))]);
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update the user net worth while counting the update as a transaction
+     *
+     * @param \App\Http\Requests\UpdateMyFinanceRequest $request The incoming request containing data for updating the financial record.
+     * @param \App\Models\MyFinance $myfinance The financial record to update.
+     * @return \Illuminate\Http\JsonResponse JSON response indicating success or failure of the operation, along with the updated financial record.
      */
     public function update(UpdateMyFinanceRequest $request, MyFinance $myfinance)
     {
@@ -210,7 +228,7 @@ class MyFinanceController extends Controller
         // Determine whether it is income or expense
         $isIncome = ($balanceDifference >= 0) ? 1 : 0;
 
-        # Add Transacion
+        // Add Transaction
         $transaction = new Transaction([
             'userID' => $user->id,
             'categoryID' => 1,
@@ -222,14 +240,34 @@ class MyFinanceController extends Controller
         ]);
         $transaction->save();
 
+        // Return JSON response indicating success and the updated financial record
         return response()->json(['success'=> 'true', 'message' => 'Net Worth updated successfully', 'data' => $updatedMyFinance]);
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified financial record from storage.
+     *
+     * @param string $id The ID of the financial record to delete.
+     * @return \Illuminate\Http\JsonResponse JSON response indicating success or failure of the operation.
      */
     public function destroy(string $id)
     {
-        //
+        // Find the financial record by its ID
+        $myFinance = MyFinance::find($id);
+
+        // Check if the financial record exists
+        if (!$myFinance) {
+            return response()->json(['success'=> 'false', 'message' => 'Financial record not found'], 404);
+        }
+
+        // Attempt to delete the financial record
+        try {
+            $myFinance->delete();
+        } catch (Exception $e) {
+            return response()->json(['success'=> 'false', 'message' => 'Failed to delete financial record'], 500);
+        }
+
+        // Return JSON response indicating success
+        return response()->json(['success'=> 'true', 'message' => 'Financial record deleted successfully']);
     }
 }
