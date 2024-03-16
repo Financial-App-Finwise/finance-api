@@ -31,14 +31,11 @@ class BudgetPlanController extends Controller
         $budgetPlansQuery = BudgetPlan::with('transactions')
             ->where('userID', $user->id)
             ->whereYear('date', $year)
-            ->whereMonth('date', $month)
-            ->paginate(10);
+            ->whereMonth('date', $month);
     
         if ($isMonthlyFilter !== null) {
             $budgetPlansQuery->where('isMonthly', $isMonthlyFilter);
         }
-
-        return $budgetPlansQuery;
 
         $budgetPlans = $budgetPlansQuery->orderBy('date', 'asc')->get();
     
@@ -86,7 +83,7 @@ class BudgetPlanController extends Controller
                 'spent' => $spent,
                 'planned_budgets' => $plannedBudgets,
                 'over_budget' => $overBudget,
-                'budget_plans' => $budgetPlans
+                'budget_plans' => $budgetPlans->paginate()
             ],
         ]);
     }    
