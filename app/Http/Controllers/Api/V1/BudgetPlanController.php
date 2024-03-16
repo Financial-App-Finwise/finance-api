@@ -47,6 +47,8 @@ class BudgetPlanController extends Controller
             $budgetPlan['spent'] = (float) $budgetPlan->transactions->sum('amount');
             $budgetPlan['remaining_amount'] = (float) ($budgetPlan->amount - $budgetPlan['spent']);
 
+            $budgetPlan['transactions'] = $budgetPlan['transactions']->orderByDesc('date');
+
             // Group transactions with the same date into an array
             $groupedTransactions = $budgetPlan['transactions']->groupBy(function ($transaction) {
                 // Format the date to only include the date portion
