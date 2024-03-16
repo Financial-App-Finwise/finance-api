@@ -31,6 +31,6 @@ class StoreGoalRequest extends FormRequest
             'startDate' => 'sometimes',
             'endDate' => 'sometimes',
             'monthlyContribution' => 'sometimes',
-            ];
+        ];
     }
 }

@@ -22,7 +22,6 @@ class StoreMyFinanceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'sessionID' => 'sometimes|uuid',
             'totalbalance' => 'required|numeric|min:0',
             'currencyID' => 'required|exists:currencies,id',
         ];
