@@ -147,6 +147,7 @@ class TransactionResource extends JsonResource
         return [
             'id' => $this->id,
             'userID' => $this->userID,
+            'categoryID' => $this->categoryID,
             'category' => $category,
             'isIncome' => $this->isIncome,
             'amount' => (float) $this->amount,

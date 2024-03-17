@@ -298,23 +298,23 @@ class GoalController extends Controller
         $sortedTransactions = $transactions->get();
 
         // Group transactions with the same date into an array
-        // $groupedTransactions = $sortedTransactions->groupBy(function ($transaction) {
-        //     // Format the date to only include the date portion
-        //     $formattedDate = \Carbon\Carbon::parse($transaction->date)->toDateString();
-
-        //     // Determine if it's today, yesterday, or another day
-        //     if ($formattedDate === \Carbon\Carbon::now()->toDateString()) {
-        //         return 'today';
-        //     } elseif ($formattedDate === \Carbon\Carbon::yesterday()->toDateString()) {
-        //         return 'yesterday';
-        //     } else {
-        //         return $formattedDate;
-        //     }
-        // });
-
         $groupedTransactions = $sortedTransactions->groupBy(function ($transaction) {
-            return [$transaction->column1, $transaction->column2];
+            // Format the date to only include the date portion
+            $formattedDate = \Carbon\Carbon::parse($transaction->date)->toDateString();
+
+            // Determine if it's today, yesterday, or another day
+            if ($formattedDate === \Carbon\Carbon::now()->toDateString()) {
+                return 'today';
+            } elseif ($formattedDate === \Carbon\Carbon::yesterday()->toDateString()) {
+                return 'yesterday';
+            } else {
+                return $formattedDate;
+            }
         });
+
+        // $groupedTransactions = $sortedTransactions->groupBy(function ($transaction) {
+        //     return [$transaction->column1, $transaction->column2];
+        // });
 
         // Cast "amount" and other money-related values to float
         $goal['amount'] = (float) $goal['amount'];
@@ -345,13 +345,28 @@ class GoalController extends Controller
 
         $sixMonthsAgo = Carbon::now()->subMonths(6);
 
+        // $contributionAmountsLast6Months = $goal->transactions()
+        //     ->join('transaction_goals as tg', 'transactions.id', '=', 'tg.transactionID')
+        //     ->where('tg.goalID', $goal->id) // Filter by goalID of current goal
+        //     ->where('transactions.date', '>=', $sixMonthsAgo)
+        //     ->groupBy(
+        //         DB::raw('MONTHNAME(transactions.date)'), // Group by month name
+        //         'transaction_goals.goalID' // Include goalID in GROUP BY clause
+        //     )
+        //     ->orderBy('transactions.date')
+        //     ->get([
+        //         DB::raw('MONTHNAME(transactions.date) as month'), // Format month as month name
+        //         DB::raw('SUM(tg.ContributionAmount) as totalContribution'),
+        //         'transaction_goals.goalID as laravel_through_key' // Alias the goalID for consistency
+        //     ]);
         $contributionAmountsLast6Months = $goal->transactions()
             ->join('transaction_goals as tg', 'transactions.id', '=', 'tg.transactionID')
             ->where('tg.goalID', $goal->id) // Filter by goalID of current goal
             ->where('transactions.date', '>=', $sixMonthsAgo)
             ->groupBy(
                 DB::raw('MONTHNAME(transactions.date)'), // Group by month name
-                'transaction_goals.goalID' // Include goalID in GROUP BY clause
+                'transaction_goals.goalID', // Include goalID in GROUP BY clause
+                'transactions.date' // Include transactions.date in GROUP BY clause
             )
             ->orderBy('transactions.date')
             ->get([

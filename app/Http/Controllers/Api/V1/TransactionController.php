@@ -10,6 +10,9 @@ use App\Http\Requests\V1\UpdateTransactionRequest;
 
 use App\Models\User;
 use App\Models\Transaction;
+use App\Models\UpcomingBill;
+use App\Models\BudgetPlan;
+use App\Models\Category;
 use App\Models\Goal;
 use App\Models\TransactionGoal;
 use App\Http\Resources\V1\TransactionResource;
@@ -50,95 +53,8 @@ class TransactionController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    // public function create()
-    // {
-    //     // Logic to get a specific upcomingbill by ID
-    //     $transaction = Transaction::find($id);
-    //     return response()->json($transaction);
-    // }
-
-    /**
      * Store a newly created resource in storage.
      */
-    // public function store(StoreTransactionRequest $request)
-    // {
-    //     try {
-    //         // Get user id from jwt token
-    //         $user = auth()->user();
-
-    //         // Add user id to the request
-    //         $request->merge(['userID' => $user->id]);
-
-    //         // Validate the incoming request
-    //         $validatedData = $request->validated();
-
-    //         $validatedData['userID'] = $user->id;
-
-    //         // Create a new transaction instance
-    //         $transaction = new Transaction();
-
-    //         // Populate the transaction attributes with validated data
-    //         $transaction->fill($validatedData);
-
-    //         // Save the transaction to the database
-    //         $transaction->save();
-
-    //         return new TransactionResource($transaction);
-    //     } catch (\Exception $e) {
-    //         return response()->json(['error' => $e->getMessage()], 400);
-    //     }
-    // }
-
-    // public function store(StoreTransactionRequest $request)
-    // {
-    //     try {
-    //         // Get user id from jwt token
-    //         $user = auth()->user();
-
-    //         // Add user id to the request
-    //         $request->merge(['userID' => $user->id]);
-
-    //         // Validate the incoming request
-    //         $validatedData = $request->validated();
-
-    //         $validatedData['userID'] = $user->id;
-
-    //         // Check if contribution to smart goal is specified
-    //         if ($request->has('goalID') && $request->has('contributionAmount')) {
-    //             // Calculate the contribution amount
-    //             $contributionAmount = $request->input('contributionAmount');
-
-    //             // Deduct the contribution amount from the original transaction amount
-    //             $validatedData['amount'] -= $contributionAmount;
-
-    //             // Save the modified transaction details to the transactions table
-    //             $transaction = new Transaction();
-    //             $transaction->fill($validatedData);
-    //             $transaction->save();
-
-    //             // Save the contribution details to the transaction_goals table
-    //             $transactionGoal = new TransactionGoal();
-    //             $transactionGoal->userID = $user->id;
-    //             $transactionGoal->transactionID = $transaction->id;
-    //             $transactionGoal->goalID = $request->input('goalID');
-    //             $transactionGoal->ContributionAmount = $contributionAmount;
-    //             $transactionGoal->save();
-
-    //             return response()->json(['transaction' => new TransactionResource($transaction), 'transactionGoal' => new TransactionGoalResource($transactionGoal)], 201);
-    //         } else {
-    //             // If no contribution to smart goal is specified, simply save the transaction
-    //             $transaction = new Transaction();
-    //             $transaction->fill($validatedData);
-    //             $transaction->save();
-
-    //             return new TransactionResource($transaction);
-    //         }
-    //     } catch (\Exception $e) {
-    //         return response()->json(['error' => $e->getMessage()], 400);
-    //     }
-    // }
 
     public function store(StoreTransactionRequest $request)
     {
@@ -151,6 +67,61 @@ class TransactionController extends Controller
 
             // Validate the incoming request
             $validatedData = $request->validated();
+
+            // Check if categoryID is present in the request
+            if ($request->has('categoryID')) {
+                // Fetch the category details based on categoryID
+                $category = Category::findOrFail($validatedData['categoryID']);
+
+                // Automatically set isIncome based on the category's isIncome value
+                $validatedData['isIncome'] = $category->isIncome;
+
+                // Automatically set expenseType to "General"
+                $validatedData['expenseType'] = "General";
+                $validatedData['budgetplanID'] = null;
+                $validatedData['upcomingBillID'] = null;
+                $validatedData['hasContributed'] = 0;
+
+
+                // If the category's isIncome is 1, set expenseType to "General"
+                if ($category->isIncome == 1) {
+                    // Automatically set isIncome based on the category's isIncome value
+                    $validatedData['isIncome'] = $category->isIncome;
+                    $validatedData['expenseType'] = "General";
+                    $validatedData['budgetplanID'] = null;
+                    $validatedData['upcomingBillID'] = null;
+                    $validatedData['hasContributed'] = 1;
+
+                }
+            }
+
+            // Check if upcomingbillID or budgetPlanID is present in the request
+            if ($request->has('upcomingbillID')) {
+                // If upcomingbillID is present, set expenseType to 'Upcoming Bill'
+                $validatedData['expenseType'] = 'Upcoming Bill';
+                $validatedData['hasContributed'] = 0;
+                $validatedData['budgetplanID'] = null;
+                $validatedData['isIncome'] = 0;
+
+                // Fetch the upcoming bill details based on upcomingbillID
+                $upcomingBill = UpcomingBill::findOrFail($validatedData['upcomingbillID']);
+
+                // Update categoryID and amount in the validatedData
+                $validatedData['categoryID'] = $upcomingBill->categoryID;
+                $validatedData['amount'] = $upcomingBill->amount;
+            } elseif ($request->has('budgetPlanID')) {
+
+                $validatedData['expenseType'] = 'Budget Plan';
+                $validatedData['hasContributed'] = 0;
+                $validatedData['upcomingBillID'] = null;
+                $validatedData['isIncome'] = 0;
+
+                // Fetch the budget plan details based on budgetPlanID
+                $budgetPlan = BudgetPlan::findOrFail($validatedData['budgetPlanID']);
+
+                // Update categoryID and amount in the validatedData
+                $validatedData['categoryID'] = $budgetPlan->categoryID;
+            } 
 
             $validatedData['userID'] = $user->id;
 
@@ -169,6 +140,11 @@ class TransactionController extends Controller
 
                 // Deduct the contribution amount from the original transaction amount
                 $validatedData['amount'] -= $contributionAmount;
+                $validatedData['expenseType'] = 'General';
+                $validatedData['hasContributed'] = 1;
+                $validatedData['upcomingBillID'] = null;
+                $validatedData['budgetPlanID'] = null;
+                $validatedData['isIncome'] = 1;
 
                 // Save the modified transaction details to the transactions table
                 $transaction = new Transaction();
