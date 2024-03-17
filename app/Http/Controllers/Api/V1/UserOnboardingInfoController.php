@@ -21,18 +21,23 @@ class UserOnboardingInfoController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse JSON response containing the user's onboarding information.
      */
-    public function index()
+    public function show()
     {
         // Get the authenticated user
         $user = auth()->user();
-
+    
         // Retrieve the user's onboarding information
         $userOnboardingInfo = UserOnboardingInfo::where('userID', $user->id)->get();
-
+    
+        // Check if onboarding information exists
+        if ($userOnboardingInfo->isEmpty()) {
+            return response()->json(['success' => false, 'message' => 'Onboarding information not found'], 404);
+        }
+    
         // Return JSON response containing the user's onboarding information
         return response()->json(['success' => true, 'data' => UserOnboardingInfoResource::collection($userOnboardingInfo)]);
     }
-
+    
     /**
      * Store the user's onboarding information.
      *
@@ -124,5 +129,33 @@ class UserOnboardingInfoController extends Controller
             // If the record is not found, return a 404 error response
             return response()->json(['success' => false, 'message' => 'User onboarding information not found.'], 404);
         }
+    }
+
+    /**
+     * Delete the specified user onboarding information.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroy($id)
+    {
+        // Find the user onboarding information by ID
+        $userOnboardingInfo = UserOnboardingInfo::find($id);
+
+        // Check if the user onboarding information exists
+        if (!$userOnboardingInfo) {
+            return response()->json(['success' => false, 'message' => 'User onboarding information not found'], 404);
+        }
+
+        // Check if the authenticated user owns the onboarding information
+        if ($userOnboardingInfo->userID !== auth()->id()) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        // Delete the user onboarding information
+        $userOnboardingInfo->delete();
+
+        // Return JSON response indicating success
+        return response()->json(['success' => true, 'message' => 'User onboarding information deleted successfully']);
     }
 }

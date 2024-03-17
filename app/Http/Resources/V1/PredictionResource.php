@@ -17,7 +17,7 @@ class PredictionResource extends JsonResource
         return [
             'id' => $this->id,
             'userID' => $this->userID,
-            'predicted_budget' => $this->predicted_budget,
+            'predicted_budget' => (float) $this->predicted_budget,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

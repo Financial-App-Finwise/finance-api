@@ -17,7 +17,7 @@ class PredictionController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse JSON response containing the user's prediction.
      */
-    public function index()
+    public function show()
     {
         // Get the authenticated user
         $user = auth()->user();
@@ -25,8 +25,13 @@ class PredictionController extends Controller
         // Retrieve the prediction associated with the user
         $prediction = Prediction::where('userID', $user->id)->first();
 
+        // Check if the prediction exists
+        if (!$prediction) {
+            return response()->json(['success' => false, 'message' => 'Prediction not found']);
+        }
+
         // Return JSON response containing the user's prediction
-        return response()->json(['success' => true, 'data' => $prediction]);
+        return response()->json(['success' => true, 'data' => new PredictionResource($prediction)]);
     }
 
     /**
@@ -54,7 +59,7 @@ class PredictionController extends Controller
             // If no prediction exists for the user, create a new one
             $predictionData['userID'] = $user->id;
             $prediction = Prediction::create($predictionData);
-            return response()->json(['success' => true, 'data' => $prediction]);
+            return response()->json(['success' => true, 'data' => new PredictionResource($prediction)]);
         }
     }
 
@@ -93,7 +98,7 @@ class PredictionController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Prediction updated successfully',
-            'data' => $prediction->fresh()
+            'data' => new PredictionResource($prediction->fresh())
         ]);
     }
 
