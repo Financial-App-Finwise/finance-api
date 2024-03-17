@@ -109,6 +109,11 @@ class TransactionController extends Controller
                 // Update categoryID and amount in the validatedData
                 $validatedData['categoryID'] = $upcomingBill->categoryID;
                 $validatedData['amount'] = $upcomingBill->amount;
+                // Update the status of the upcoming bill to "paid"
+                if (isset ($upcomingBill)) {
+                    $upcomingBill->status = "paid";
+                    $upcomingBill->save();
+                }
             } elseif ($request->has('budgetPlanID')) {
 
                 $validatedData['expenseType'] = 'Budget Plan';
@@ -121,7 +126,7 @@ class TransactionController extends Controller
 
                 // Update categoryID and amount in the validatedData
                 $validatedData['categoryID'] = $budgetPlan->categoryID;
-            } 
+            }
 
             $validatedData['userID'] = $user->id;
 
