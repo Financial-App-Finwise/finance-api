@@ -29,17 +29,26 @@ class AuthController extends Controller
      */
     public function register(RegisterRequest $request)
     {
+        // Validate user input
+        $validatedData = $request->validated();
+
+        // Check if the user with the given email already exists
+        if (User::where('email', $request->email)->exists()) {
+            return response()->json([
+                'success' => 'false',
+                'message' => 'User with this email already exists'
+            ], 400);
+        }
+    
         // Generate a random verification code.
         $code = Str::random(6);
-    
-        // Create a new user with validated request data.
-        $user = User::create(array_merge(
-            $request->validated(),
-            [
-                'password' => bcrypt($request->password),
-                'email_verification_code' => $code,
-            ]
-        ));
+
+        $user = User::create([
+            'name' => $validatedData['name'],
+            'email' => $validatedData['email'],
+            'password' => bcrypt($validatedData['password']),
+            'email_verification_code' => $code,
+        ]);
     
         // Prepare email data.
         $data['code'] = $code;

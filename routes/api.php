@@ -12,9 +12,9 @@ use Illuminate\Support\Facades\Route;
 | API Routes
 |--------------------------------------------------------------------------
 |
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
+| This file contains API routes for various functionalities, organized into
+| several route groups for authentication, user management, financial
+| operations, predictions, goals, transactions, categories, etc.
 |
 */
 
@@ -107,7 +107,7 @@ Route::group([
     // User Onboarding Info Routes
     Route::group(['prefix' => 'onboardinginfo'], function () {
         // Get user onboarding info
-        Route::get('/', [Api\V1\UserOnboardingInfoController::class, 'index']);
+        Route::get('/', [Api\V1\UserOnboardingInfoController::class, 'show']);
 
         // Create user onboarding info
         Route::post('/create', [Api\V1\UserOnboardingInfoController::class, 'create']);
@@ -115,12 +115,14 @@ Route::group([
         // Update user onboarding info
         Route::put('/', [Api\V1\UserOnboardingInfoController::class, 'update']);
         Route::patch('/', [Api\V1\UserOnboardingInfoController::class, 'update']);
+
+        Route::delete('/{id}', [UserOnboardingInfoController::class, 'destroy']);
     });
 
     // Prediction Routes
     Route::group(['prefix' => 'predictions'], function () {
         // Get predictions
-        Route::get('/', [Api\V1\PredictionController::class, 'index']);
+        Route::get('/', [Api\V1\PredictionController::class, 'show']);
 
         // Store a new prediction
         Route::post('/', [Api\V1\PredictionController::class, 'store']);
