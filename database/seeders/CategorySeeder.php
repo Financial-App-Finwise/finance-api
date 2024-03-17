@@ -1038,7 +1038,7 @@ class CategorySeeder extends Seeder
             'name' => 'Other',
             'level' => 1,
             'isOnboarding' => 1, // Onboarding category
-            'isIncome' => 0, // Expense category
+            'isIncome' => 1, // Expense category
             'parentID' => $onboardingparentCategory14->id,
         ]);
 

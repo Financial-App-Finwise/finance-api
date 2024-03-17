@@ -11,6 +11,7 @@ use App\Http\Requests\V1\UpdateMyFinanceRequest;
 use App\Models\MyFinance;
 use App\Models\Transaction;
 use App\Models\Currency;
+use App\Models\Category;
 use App\Http\Resources\V1\MyFinanceResource;
 use App\Http\Resources\V1\MyFinanceCollection;
 use App\Http\Resources\V1\TransactionResource;
@@ -228,10 +229,14 @@ class MyFinanceController extends Controller
         // Determine whether it is income or expense
         $isIncome = ($balanceDifference >= 0) ? 1 : 0;
 
+        // Retrieve "Other" category ID
+        $category = Category::where('name', 'Other')->where('isIncome', $isIncome)->first();
+        
+
         // Add Transaction
         $transaction = new Transaction([
             'userID' => $user->id,
-            'categoryID' => 1,
+            'categoryID' => $category->id,
             'isIncome' => $isIncome,
             'amount' => abs($balanceDifference),
             'hasContributed' => 0,
