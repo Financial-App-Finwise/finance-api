@@ -28,6 +28,29 @@ class TransactionController extends Controller
      * Display a listing of the resource.
      */
 
+    //     public function index(Request $request)
+//     {
+//         $user = auth()->user();
+
+    //         $filter = new TransactionFilter();
+//         $queryItems = $filter->transform($request); //[['column', 'operator', 'value']]
+
+    //         if (count($queryItems) == 0) {
+//             return new TransactionCollection(Transaction::where('userID', $user->id)->orderBy('created_at', 'desc')->paginate());
+//         } else {
+//             $query = Transaction::where('userID', $user->id);
+
+    //             foreach ($queryItems as $item) {
+//                 $query->where($item[0], $item[1], $item[2]);
+//             }
+
+    //             $transaction = $query->orderBy('id', 'desc')->paginate();
+
+    //             //$upcomingbill = UpcomingBill::where($queryItems)->paginate();
+
+    //             return new TransactionCollection($transaction->appends($request->query()));
+//         }
+//     }
     public function index(Request $request)
     {
         $user = auth()->user();
@@ -35,21 +58,31 @@ class TransactionController extends Controller
         $filter = new TransactionFilter();
         $queryItems = $filter->transform($request); //[['column', 'operator', 'value']]
 
-        if (count($queryItems) == 0) {
-            return new TransactionCollection(Transaction::where('userID', $user->id)->orderBy('created_at', 'desc')->paginate());
-        } else {
-            $query = Transaction::where('userID', $user->id);
+        $query = Transaction::where('userID', $user->id);
 
-            foreach ($queryItems as $item) {
-                $query->where($item[0], $item[1], $item[2]);
-            }
-
-            $transaction = $query->orderBy('created_at', 'desc')->paginate();
-
-            //$upcomingbill = UpcomingBill::where($queryItems)->paginate();
-
-            return new TransactionCollection($transaction->appends($request->query()));
+        foreach ($queryItems as $item) {
+            $query->where($item[0], $item[1], $item[2]);
         }
+
+        $sortBy = $request->query('filter');
+
+        // Apply sorting based on the filter parameter
+        if ($sortBy === 'Recently') {
+            $query->orderBy('date', 'desc');
+        } elseif ($sortBy === 'Earliest') {
+            $query->orderBy('date', 'asc');
+        } elseif ($sortBy === 'Highest') {
+            $query->orderBy('amount', 'desc');
+        } elseif ($sortBy === 'Lowest') {
+            $query->orderBy('amount', 'asc');
+        } else {
+            // Default sorting by created_at in descending order
+            $query->orderBy('date', 'desc');
+        }
+
+        $transactions = $query->paginate();
+
+        return new TransactionCollection($transactions->appends($request->query()));
     }
 
     /**

@@ -344,21 +344,6 @@ class GoalController extends Controller
         $goal['transactions'] = $groupedTransactions;
 
         $sixMonthsAgo = Carbon::now()->subMonths(6);
-
-        // $contributionAmountsLast6Months = $goal->transactions()
-        //     ->join('transaction_goals as tg', 'transactions.id', '=', 'tg.transactionID')
-        //     ->where('tg.goalID', $goal->id) // Filter by goalID of current goal
-        //     ->where('transactions.date', '>=', $sixMonthsAgo)
-        //     ->groupBy(
-        //         DB::raw('MONTHNAME(transactions.date)'), // Group by month name
-        //         'transaction_goals.goalID' // Include goalID in GROUP BY clause
-        //     )
-        //     ->orderBy('transactions.date')
-        //     ->get([
-        //         DB::raw('MONTHNAME(transactions.date) as month'), // Format month as month name
-        //         DB::raw('SUM(tg.ContributionAmount) as totalContribution'),
-        //         'transaction_goals.goalID as laravel_through_key' // Alias the goalID for consistency
-        //     ]);
         $contributionAmountsLast6Months = $goal->transactions()
             ->join('transaction_goals as tg', 'transactions.id', '=', 'tg.transactionID')
             ->where('tg.goalID', $goal->id) // Filter by goalID of current goal
@@ -375,9 +360,13 @@ class GoalController extends Controller
                 'transaction_goals.goalID as laravel_through_key' // Alias the goalID for consistency
             ]);
 
-        // Calculate the average total contribution
-        $totalContributionSum = $contributionAmountsLast6Months->sum('totalContribution');
-        $averageTotalContribution = $totalContributionSum / $contributionAmountsLast6Months->count();
+        // // Calculate the average total contribution
+        // $totalContributionSum = $contributionAmountsLast6Months->sum('totalContribution');
+        // $averageTotalContribution = $totalContributionSum / $contributionAmountsLast6Months->count();
+
+        // Calculate the average total contribution only if the count is not zero
+        $averageTotalContribution = $contributionAmountsLast6Months->count() > 0 ?
+            $contributionAmountsLast6Months->sum('totalContribution') / $contributionAmountsLast6Months->count() : 0;
 
         // Retrieve the total contribution in the last month
         $totalContributionLastMonth = $contributionAmountsLast6Months->last()->totalContribution ?? 0;
@@ -420,33 +409,7 @@ class GoalController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    // public function update(UpdateGoalRequest $request, Goal $goal)
-    // {
-    //     // Logic to update a goal by ID
-    //     // $goal->update($request->all());
-    //     // return response()->json(['message' => 'Goal updated successfully']);
-
-    //     // Check if the model is retrieved successfully
-    //     if (!$goal) {
-    //         return response()->json(['error' => 'Goal not found'], 404);
-    //     }
-
-    //     # add user id to the request
-    //     $user = auth()->user();
-    //     # check if the budget plan belongs to the user
-    //     if ($goal->userID != $user->id) {
-    //         return response()->json(['success' => 'false', 'message' => 'You are not authorized to delete this Smart Goal'], 403);
-    //     }
-
-    //     // Logic to update a budget plan by ID
-    //     try {
-    //         $goal->update($request->validated());
-    //     } catch (Exception $e) {
-    //         return response()->json(['success' => 'false', 'message' => 'Failed to update Smart Goal'], 500);
-    //     }
-
-    //     return response()->json(['success' => 'true', 'message' => 'Smart Goal updated successfully']);
-    // }
+    
     public function update(UpdateGoalRequest $request, Goal $goal)
     {
         // Check if the model is retrieved successfully
