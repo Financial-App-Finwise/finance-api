@@ -112,7 +112,7 @@ class TransactionController extends Controller
                 // Automatically set expenseType to "General"
                 $validatedData['expenseType'] = "General";
                 $validatedData['budgetplanID'] = null;
-                $validatedData['upcomingBillID'] = null;
+                $validatedData['upcomingbillID'] = null;
                 $validatedData['hasContributed'] = 0;
 
 
@@ -122,13 +122,13 @@ class TransactionController extends Controller
                     $validatedData['isIncome'] = $category->isIncome;
                     $validatedData['expenseType'] = "General";
                     $validatedData['budgetplanID'] = null;
-                    $validatedData['upcomingBillID'] = null;
+                    $validatedData['upcomingbillID'] = null;
                     $validatedData['hasContributed'] = 1;
 
                 }
             }
 
-            // Check if upcomingbillID or budgetPlanID is present in the request
+            // Check if upcomingbillID or budgetplanID is present in the request
             if ($request->has('upcomingbillID')) {
                 // If upcomingbillID is present, set expenseType to 'Upcoming Bill'
                 $validatedData['expenseType'] = 'Upcoming Bill';
@@ -147,15 +147,15 @@ class TransactionController extends Controller
                     $upcomingBill->status = "paid";
                     $upcomingBill->save();
                 }
-            } elseif ($request->has('budgetPlanID')) {
+            } elseif ($request->has('budgetplanID')) {
 
                 $validatedData['expenseType'] = 'Budget Plan';
                 $validatedData['hasContributed'] = 0;
-                $validatedData['upcomingBillID'] = null;
+                $validatedData['upcomingbillID'] = null;
                 $validatedData['isIncome'] = 0;
 
-                // Fetch the budget plan details based on budgetPlanID
-                $budgetPlan = BudgetPlan::findOrFail($validatedData['budgetPlanID']);
+                // Fetch the budget plan details based on budgetplanID
+                $budgetPlan = BudgetPlan::findOrFail($validatedData['budgetplanID']);
 
                 // Update categoryID and amount in the validatedData
                 $validatedData['categoryID'] = $budgetPlan->categoryID;
@@ -180,8 +180,8 @@ class TransactionController extends Controller
                 $validatedData['amount'] -= $contributionAmount;
                 $validatedData['expenseType'] = 'General';
                 $validatedData['hasContributed'] = 1;
-                $validatedData['upcomingBillID'] = null;
-                $validatedData['budgetPlanID'] = null;
+                $validatedData['upcomingbillID'] = null;
+                $validatedData['budgetplanID'] = null;
                 $validatedData['isIncome'] = 1;
 
                 // Save the modified transaction details to the transactions table
