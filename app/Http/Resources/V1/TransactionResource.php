@@ -133,17 +133,33 @@ class TransactionResource extends JsonResource
             'isRecurring' => $this->budgetPlan->isRecurring,
         ] : null;
 
-        $transactionGoal = $this->transactionGoal ? [
-            'id' => $this->transactionGoal->id,
-            'ContributionAmount' => (float) $this->transactionGoal->ContributionAmount,
-            'goal' => $this->transactionGoal->goal ? [
-                'id' => $this->transactionGoal->goal->id,
-                'name' => $this->transactionGoal->goal->name,
-                'amount' => $this->transactionGoal->goal->amount,
-                'remainingSave' => $this->transactionGoal->goal->remainingSave,
-            ] : null,
-        ] : null;
+        //Test
+        // $transactionGoal = $this->transactionGoal ? [
+        //     'id' => $this->transactionGoal->id,
+        //     'ContributionAmount' => (float) $this->transactionGoal->ContributionAmount,
+        //     'goal' => $this->transactionGoal->goal ? [
+        //         'id' => $this->transactionGoal->goal->id,
+        //         'name' => $this->transactionGoal->goal->name,
+        //         'amount' => $this->transactionGoal->goal->amount,
+        //         'remainingSave' => $this->transactionGoal->goal->remainingSave,
+        //     ] : null,
+        // ] : null;
 
+        $transactionGoals = [];
+        if ($this->transactionGoals) {
+            foreach ($this->transactionGoals as $goal) {
+                $transactionGoals[] = [
+                    'id' => $goal->id,
+                    'ContributionAmount' => (float) $goal->ContributionAmount,
+                    'goal' => $goal->goal ? [
+                        'id' => $goal->goal->id,
+                        'name' => $goal->goal->name,
+                        'amount' => $goal->goal->amount,
+                        'remainingSave' => $goal->goal->remainingSave,
+                    ] : null,
+                ];
+            }
+        }
         return [
             'id' => $this->id,
             'userID' => $this->userID,
@@ -157,9 +173,8 @@ class TransactionResource extends JsonResource
             'expenseType' => $this->expenseType,
             'date' => $this->date,
             'note' => $this->note,
-            'transactionGoal' => $transactionGoal,
+            'transactionGoals' => $transactionGoals,
         ];
     }
 }
 
-            

@@ -23,4 +23,8 @@ class TransactionGoal extends Model
     {
         return $this->belongsTo(Goal::class, 'goalID');
     }
+    public function transactionGoals()
+    {
+        return $this->hasMany(TransactionGoal::class, 'transactionID');
+    }
 }

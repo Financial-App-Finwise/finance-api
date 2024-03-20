@@ -29,8 +29,11 @@ class StoreTransactionRequest extends FormRequest
             'hasContributed' => 'sometimes|boolean',
             'upcomingbillID' => 'sometimes',
             'budgetplanID' => 'sometimes',
-            'goalID' => 'sometimes', // Add this rule to allow specifying a goal ID
-            'contributionAmount' => 'sometimes|numeric',
+            // 'goalID' => 'sometimes', // Add this rule to allow specifying a goal ID
+            // 'contributionAmount' => 'sometimes|numeric',
+            'contributions' => 'sometimes|array', // Adjusted to accept an array of contributions
+            'contributions.*.goalID' => 'required|numeric', // Validation rule for each contribution's goalID
+            'contributions.*.contributionAmount' => 'required|numeric', // Validation rule for each contribution's contributionAmount
             'expenseType' => 'sometimes',
             'date' => 'sometimes',
             'note' => 'sometimes',

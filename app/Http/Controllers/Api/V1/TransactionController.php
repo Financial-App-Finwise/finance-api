@@ -27,30 +27,7 @@ class TransactionController extends Controller
     /**
      * Display a listing of the resource.
      */
-
-    //     public function index(Request $request)
-//     {
-//         $user = auth()->user();
-
-    //         $filter = new TransactionFilter();
-//         $queryItems = $filter->transform($request); //[['column', 'operator', 'value']]
-
-    //         if (count($queryItems) == 0) {
-//             return new TransactionCollection(Transaction::where('userID', $user->id)->orderBy('created_at', 'desc')->paginate());
-//         } else {
-//             $query = Transaction::where('userID', $user->id);
-
-    //             foreach ($queryItems as $item) {
-//                 $query->where($item[0], $item[1], $item[2]);
-//             }
-
-    //             $transaction = $query->orderBy('id', 'desc')->paginate();
-
-    //             //$upcomingbill = UpcomingBill::where($queryItems)->paginate();
-
-    //             return new TransactionCollection($transaction->appends($request->query()));
-//         }
-//     }
+    
     public function index(Request $request)
     {
         $user = auth()->user();
@@ -81,6 +58,8 @@ class TransactionController extends Controller
         }
 
         $transactions = $query->paginate();
+        //$transactions = $query->orderBy('date', 'desc')->paginate();
+
 
         return new TransactionCollection($transactions->appends($request->query()));
     }
@@ -88,7 +67,6 @@ class TransactionController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-
     public function store(StoreTransactionRequest $request)
     {
         try {
@@ -115,7 +93,6 @@ class TransactionController extends Controller
                 $validatedData['upcomingbillID'] = null;
                 $validatedData['hasContributed'] = 0;
 
-
                 // If the category's isIncome is 1, set expenseType to "General"
                 if ($category->isIncome == 1) {
                     // Automatically set isIncome based on the category's isIncome value
@@ -123,8 +100,7 @@ class TransactionController extends Controller
                     $validatedData['expenseType'] = "General";
                     $validatedData['budgetplanID'] = null;
                     $validatedData['upcomingbillID'] = null;
-                    $validatedData['hasContributed'] = 1;
-
+                    $validatedData['hasContributed'] = 0;
                 }
             }
 
@@ -142,13 +118,13 @@ class TransactionController extends Controller
                 // Update categoryID and amount in the validatedData
                 $validatedData['categoryID'] = $upcomingBill->categoryID;
                 $validatedData['amount'] = $upcomingBill->amount;
+
                 // Update the status of the upcoming bill to "paid"
                 if (isset ($upcomingBill)) {
                     $upcomingBill->status = "paid";
                     $upcomingBill->save();
                 }
             } elseif ($request->has('budgetplanID')) {
-
                 $validatedData['expenseType'] = 'Budget Plan';
                 $validatedData['hasContributed'] = 0;
                 $validatedData['upcomingbillID'] = null;
@@ -164,40 +140,62 @@ class TransactionController extends Controller
             $validatedData['userID'] = $user->id;
 
             // Check if contribution to smart goal is specified
-            if ($request->has('goalID') && $request->has('contributionAmount')) {
-                // Calculate the contribution amount
-                $contributionAmount = $request->input('contributionAmount');
+            if ($request->has('contributions')) {
+                // Retrieve contributions from the request
+                $contributions = $request->input('contributions');
 
-                // Retrieve the corresponding goal based on the goalID
-                $goal = Goal::findOrFail($request->input('goalID'));
+                // Calculate the total contribution amount
+                $totalContribution = array_sum(array_column($contributions, 'contributionAmount'));
 
-                // Deduct the contribution amount from the remainingSave column of the goal
-                $goal->remainingSave -= $contributionAmount;
-                $goal->currentSave += $contributionAmount;
-                $goal->save();
+                // Deduct the total contribution amount from the original transaction amount
+                $validatedData['amount'] -= $totalContribution;
 
-                // Deduct the contribution amount from the original transaction amount
-                $validatedData['amount'] -= $contributionAmount;
+                // Update the specified fields of the transaction
                 $validatedData['expenseType'] = 'General';
                 $validatedData['hasContributed'] = 1;
                 $validatedData['upcomingbillID'] = null;
                 $validatedData['budgetplanID'] = null;
                 $validatedData['isIncome'] = 1;
 
-                // Save the modified transaction details to the transactions table
+                // Save the original transaction details to the transactions table
                 $transaction = new Transaction();
                 $transaction->fill($validatedData);
                 $transaction->save();
 
-                // Save the contribution details to the transaction_goals table
-                $transactionGoal = new TransactionGoal();
-                $transactionGoal->userID = $user->id;
-                $transactionGoal->transactionID = $transaction->id;
-                $transactionGoal->goalID = $request->input('goalID');
-                $transactionGoal->ContributionAmount = $contributionAmount;
-                $transactionGoal->save();
+                $transactionGoalsArray = [];
+                // Process each contribution
+                foreach ($contributions as $contribution) {
+                    // Retrieve the corresponding goal based on the goalID
+                    $goal = Goal::findOrFail($contribution['goalID']);
 
-                return response()->json(['transaction' => new TransactionResource($transaction), 'transactionGoal' => new TransactionGoalResource($transactionGoal)], 201);
+                    // Deduct the contribution amount from the remainingSave column of the goal
+                    $goal->remainingSave -= $contribution['contributionAmount'];
+
+                    // Increase the currentSave column of the goal based on the contribution amount
+                    $goal->currentSave += $contribution['contributionAmount'];
+
+                    // Save the updated goal details
+                    $goal->save();
+
+                    // Save the contribution details to the transaction_goals table
+                    $transactionGoal = new TransactionGoal();
+                    $transactionGoal->userID = $user->id;
+                    $transactionGoal->transactionID = $transaction->id;
+                    $transactionGoal->goalID = $contribution['goalID'];
+                    $transactionGoal->ContributionAmount = $contribution['contributionAmount'];
+                    $transactionGoal->save();
+
+                    // Add transaction goal to the array
+                    $transactionGoalsArray[] = new TransactionGoalResource($transactionGoal);
+                }
+
+                // Add transactionGoalsArray to the transaction object
+                $transaction->transactionGoals = $transactionGoalsArray;
+
+                // Return the response with the transaction object
+                return response()->json([
+                    'transaction' => new TransactionResource($transaction)
+                ], 201);
             } else {
                 // If no contribution to smart goal is specified, simply save the transaction
                 $transaction = new Transaction();
@@ -212,13 +210,15 @@ class TransactionController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     */
+    * Display the specified resource.
+    **/
     public function show(Transaction $transaction)
     {
         // Logic to get a specific transaction by ID
-        return response()->json($transaction);
+        return new TransactionResource($transaction);
     }
+    //return response()->json($transaction);
+
 
     /**
      * Show the form for editing the specified resource.
