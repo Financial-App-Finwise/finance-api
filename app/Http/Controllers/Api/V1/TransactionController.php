@@ -13,6 +13,7 @@ use App\Models\Transaction;
 use App\Models\UpcomingBill;
 use App\Models\BudgetPlan;
 use App\Models\Category;
+use App\Models\MyFinance;
 use App\Models\Goal;
 use App\Models\TransactionGoal;
 use App\Http\Resources\V1\TransactionResource;
@@ -139,6 +140,15 @@ class TransactionController extends Controller
 
             $validatedData['userID'] = $user->id;
 
+            if ($validatedData['isIncome']) {
+                // Increment user net worth by $data['amount']
+                MyFinance::where('userID', $user->id)->increment('totalbalance', $validatedData['amount']);
+            } else {
+                // Subtract from the net worth by $data['amount']
+                MyFinance::where('userID', $user->id)->decrement('totalbalance', $validatedData['amount']);
+            }
+            
+
             // Check if contribution to smart goal is specified
             if ($request->has('contributions')) {
                 // Retrieve contributions from the request
@@ -247,6 +257,25 @@ class TransactionController extends Controller
         // Logic to update a transaction by ID
         try {
             $validatedData = $request->validated();
+
+
+            // Update Net worth if user supply new transaction amount
+            if (isset($validatedData['amount'])) {
+                // Query old amount
+                $oldAmount = $transaction->amount;
+                // Calculate the difference between the original amount and the updated amount
+                $difference = $validatedData['amount'] - $oldAmount;
+                
+                if ($transaction->isIncome) {
+                    // If the updated transaction is considered as income, add the difference to totalbalance
+                    MyFinance::where('userID', $user->id)->increment('totalbalance', $difference);
+                } else {
+                    // If the updated transaction is considered as an expense, subtract the difference from totalbalance
+                    MyFinance::where('userID', $user->id)->decrement('totalbalance', $difference);
+                }
+            }
+
+
             $transaction->update($validatedData);
         } catch (Exception $e) {
             return response()->json(['success' => 'false', 'message' => 'Failed to update transaction'], 500);
