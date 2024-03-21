@@ -110,7 +110,7 @@ class GoalController extends Controller
 
         // Retrieve transaction counts for each goal
         foreach ($goals as $goal) {
-            $transactionCount = $goal->transactionGoal()->count();
+            $transactionCount = $goal->transactionGoals()->count();
             $goal->transactionCount = $transactionCount; // Add transaction count to each goal object
         }
         return new GoalCollection($goals->appends($request->query()));
