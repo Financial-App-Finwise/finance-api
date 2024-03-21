@@ -26,7 +26,7 @@ class Goal extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function transactionGoal()
+    public function transactionGoals()
     {
         return $this->hasMany(TransactionGoal::class, 'goalID', 'id');
     }
@@ -35,6 +35,4 @@ class Goal extends Model
     {
         return $this->hasManyThrough(Transaction::class, TransactionGoal::class, 'goalID', 'id', 'id', 'transactionID');
     }
-
-
 }

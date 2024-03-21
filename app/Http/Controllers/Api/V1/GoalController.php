@@ -268,13 +268,14 @@ class GoalController extends Controller
      * Show the form for editing the specified resource.
      */
 
-
     public function show(Goal $goal)
     {
         $filter = request('filter', null);
 
         // Load transactions relationship and apply sorting based on the request
         $transactions = $goal->transactions();
+        //$transactions = $goal->transactions()->with('transactionGoals');
+
 
         switch ($filter) {
             case 'recently':
@@ -284,15 +285,20 @@ class GoalController extends Controller
                 $transactions = $transactions->orderBy('date');
                 break;
             case 'lowest':
-                $transactions = $transactions->orderBy('amount');
+                // Order by the lowest contribution amount
+                $transactions = $transactions->leftJoin('transaction_goals as tg_lowest', 'transactions.id', '=', 'tg_lowest.transactionID')
+                    ->orderBy('tg_lowest.ContributionAmount');
                 break;
             case 'highest':
-                $transactions = $transactions->orderByDesc('amount');
+                // Order by the highest contribution amount
+                $transactions = $transactions->leftJoin('transaction_goals as tg_highest', 'transactions.id', '=', 'tg_highest.transactionID')
+                    ->orderByDesc('tg_highest.ContributionAmount');
                 break;
             // 'all' or unknown filters will include all transactions
             default:
                 break;
         }
+
 
         // Now, retrieve the sorted transactions
         $sortedTransactions = $transactions->get();
@@ -312,17 +318,16 @@ class GoalController extends Controller
             }
         });
 
-        // $groupedTransactions = $sortedTransactions->groupBy(function ($transaction) {
-        //     return [$transaction->column1, $transaction->column2];
-        // });
-
         // Cast "amount" and other money-related values to float
         $goal['amount'] = (float) $goal['amount'];
         $goal['transactions_count'] = (int) $sortedTransactions->count();
 
-        // Modify the grouped transactions to include ContributionAmount for each transaction
         $groupedTransactions->transform(function ($transactions) {
             return $transactions->map(function ($transaction) {
+                // Check if transactionGoal is not null before accessing ContributionAmount
+                //$contributionAmount = $transaction->transactionGoal ? $transaction->transactionGoal->ContributionAmount : 0;
+                $contributionAmount = $transaction->transactionGoals->isNotEmpty() ?
+                    $transaction->transactionGoals->sum('ContributionAmount') : 0;
                 return [
                     'id' => $transaction->id,
                     'userID' => $transaction->userID,
@@ -335,10 +340,13 @@ class GoalController extends Controller
                     'expenseType' => $transaction->expenseType,
                     'date' => $transaction->date,
                     'note' => $transaction->note,
-                    'ContributionAmount' => $transaction->transactionGoal->ContributionAmount,
+                    'ContributionAmount' => $contributionAmount,
                 ];
             });
         });
+
+        // Cast "amount" and other money-related values to float
+        $goal['transactions_count'] = $transactions->count();
 
         // Add the modified grouped transactions to the response data
         $goal['transactions'] = $groupedTransactions;
@@ -349,20 +357,18 @@ class GoalController extends Controller
             ->where('tg.goalID', $goal->id) // Filter by goalID of current goal
             ->where('transactions.date', '>=', $sixMonthsAgo)
             ->groupBy(
-                DB::raw('MONTHNAME(transactions.date)'), // Group by month name
-                'transaction_goals.goalID', // Include goalID in GROUP BY clause
-                'transactions.date' // Include transactions.date in GROUP BY clause
-            )
+                     DB::raw('YEAR(transactions.date)'), // Group by year
+                     DB::raw('MONTHNAME(transactions.date)'), // Group by month name
+                     'transaction_goals.goalID', // Include goalID in GROUP BY clause
+                     //'transactions.date' // Include transactions.date in GROUP BY clause
+                 )
             ->orderBy('transactions.date')
             ->get([
+                DB::raw('YEAR(transactions.date) as year'), // Extract year from date
                 DB::raw('MONTHNAME(transactions.date) as month'), // Format month as month name
                 DB::raw('SUM(tg.ContributionAmount) as totalContribution'),
                 'transaction_goals.goalID as laravel_through_key' // Alias the goalID for consistency
             ]);
-
-        // // Calculate the average total contribution
-        // $totalContributionSum = $contributionAmountsLast6Months->sum('totalContribution');
-        // $averageTotalContribution = $totalContributionSum / $contributionAmountsLast6Months->count();
 
         // Calculate the average total contribution only if the count is not zero
         $averageTotalContribution = $contributionAmountsLast6Months->count() > 0 ?
@@ -388,7 +394,7 @@ class GoalController extends Controller
                 'note' => $transaction->note,
                 'transactionGoal' => [
                     'id' => $transaction->laravel_through_key,
-                    'ContributionAmount' => $transaction->totalContribution,
+                    'ContributionAmount' => $transaction->ContributionAmount,
                 ]
             ];
         });
@@ -409,7 +415,7 @@ class GoalController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    
+
     public function update(UpdateGoalRequest $request, Goal $goal)
     {
         // Check if the model is retrieved successfully

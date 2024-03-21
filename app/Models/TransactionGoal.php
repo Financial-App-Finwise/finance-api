@@ -15,16 +15,23 @@ class TransactionGoal extends Model
         'ContributionAmount',
     ];
 
-    public function user(){
+    public function user()
+    {
         return $this->belongsTo(User::class);
     }
-    
+
     public function goal()
     {
         return $this->belongsTo(Goal::class, 'goalID');
     }
-    public function transactionGoals()
+    // public function transactionGoals()
+    // {
+    //     return $this->hasMany(TransactionGoal::class, 'transactionID');
+    // }
+
+    public function transaction()
     {
-        return $this->hasMany(TransactionGoal::class, 'transactionID');
+        return $this->belongsTo(Transaction::class, 'transactionID');
     }
+
 }
