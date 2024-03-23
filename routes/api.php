@@ -236,7 +236,7 @@ Route::group([
     });
 });
 // Get isOnbaording = 1 category without user log in
-Route::get('/defaults', [Api\V1\CategoryController::class, 'getDefaultCategories']);
+Route::get('/default_categories', [Api\V1\CategoryController::class, 'getDefaultCategories']);
 // Reject any random requests
 Route::any('{any}', function () {
     return response()->json(
