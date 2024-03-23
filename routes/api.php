@@ -1,5 +1,6 @@
 <?php
 namespace App\Http\Controllers;
+
 use App\Http\Requests\V1\UpdateUserRequest;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthController;
@@ -178,7 +179,7 @@ Route::group([
 
     // Transaction Routes
     Route::group(['prefix' => 'transactions'], function () {
-         // Get all transactions
+        // Get all transactions
         Route::get('/', [Api\V1\TransactionController::class, 'index']);
 
         // Get a specific transaction
@@ -231,8 +232,11 @@ Route::group([
 
         // Delete a specific category
         Route::delete('/{category}', [Api\V1\CategoryController::class, 'destroy']);
+
+        // Get isOnbaording = 1 category without user log in
+        Route::get('/defaults', [Api\V1\CategoryController::class, 'getDefaultCategories'])->withoutMiddleware(['auth:sanctum']);
     });
-}); 
+});
 
 // Reject any random requests
 Route::any('{any}', function () {

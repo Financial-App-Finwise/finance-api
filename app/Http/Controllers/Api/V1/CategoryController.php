@@ -17,25 +17,6 @@ use App\Filters\V1\CategoryFilter;
 
 class CategoryController extends Controller
 {
-    //     public function index(Request $request)
-//     {
-//         $user = auth()->user();
-// Í   
-//         $filter = new CategoryFilter();
-//         $queryItems = $filter->transform($request); //[['column', 'operator', 'value']]
-//         $query = Category::where('userID', $user->id);
-
-
-    //         if (count($queryItems) == 0){
-//             return new CategoryCollection(Category::all());
-//         } else{ 
-
-    //             $category = Category::where($queryItems)->all();
-
-    //             return new CategoryCollection($category->appends($request->query()));
-
-    //         }
-//     }
     public function index(Request $request)
     {
         $user = auth()->user();
@@ -57,59 +38,16 @@ class CategoryController extends Controller
 
         //return new CategoryCollection($category->appends($request->query()));
         return new CategoryCollection($category);
+        
     }
-    //return new CategoryCollection(Category::where($queryItems)->paginate());
+    public function getDefaultCategories(Request $request)
+    {
+        // Assuming default categories are fetched from the database
+        $defaultCategories = Category::where('isOnbaording', 1)->get();
 
-    //Normal index function but we don't need it
-    // public function index(){
-    //     //Logic to get all categories
-    //     //return Category::all(); 
+        return response()->json(['categories' => $defaultCategories], 200);
+    }
 
-    //     //Logic to store data in collection
-    //     //return new CategoryCollection(Category::all());
-
-    //     //Logic to paginate the store data 
-    //     return new CategoryCollection(Category::paginate());
-    // }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    // public function create()
-    // {
-    //     // Logic to get a specific category by ID
-    //      $category = Category::find($id);
-    //      return response()->json($category);
-    // }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    // public function store(StoreCategoryRequest $request)
-    // {
-    //     try {
-    //         // Get user id from jwt token
-    //         $user = auth()->user();
-
-    //         // Add user id to the request
-    //         $request->merge(['userID' => $user->id]);
-
-    //         // Validate the incoming request
-    //         $validatedData = $request->validated();
-
-    //         $validatedData['userID'] = $user->id;
-
-    //         $category = new Category();
-
-    //         $category->fill($validatedData);
-
-    //         $category->save();
-
-    //         return new CategoryResource($category);
-    //     } catch (\Exception $e) {
-    //         return response()->json(['error' => $e->getMessage()], 400);
-    //     }
-    // }
     public function store(StoreCategoryRequest $request)
     {
         try {
@@ -124,7 +62,7 @@ class CategoryController extends Controller
             $validatedData['userID'] = $user->id;
 
             // Automatically set level based on parentID presence
-            $validatedData['level'] = isset($validatedData['parentID']) ? 1 : 2;
+            $validatedData['level'] = isset ($validatedData['parentID']) ? 1 : 2;
 
             $category = new Category();
 
