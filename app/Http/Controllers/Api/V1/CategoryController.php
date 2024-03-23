@@ -43,7 +43,7 @@ class CategoryController extends Controller
     public function getDefaultCategories(Request $request)
     {
         // Assuming default categories are fetched from the database
-        $defaultCategories = Category::where('isOnbaording', 1)->get();
+        $defaultCategories = Category::where('isOnboarding', 1)->get();
 
         return response()->json(['categories' => $defaultCategories], 200);
     }

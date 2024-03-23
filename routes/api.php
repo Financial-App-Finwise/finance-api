@@ -233,11 +233,10 @@ Route::group([
         // Delete a specific category
         Route::delete('/{category}', [Api\V1\CategoryController::class, 'destroy']);
 
-        // Get isOnbaording = 1 category without user log in
-        Route::get('/defaults', [Api\V1\CategoryController::class, 'getDefaultCategories'])->withoutMiddleware(['auth:sanctum']);
     });
 });
-
+// Get isOnbaording = 1 category without user log in
+Route::get('/defaults', [Api\V1\CategoryController::class, 'getDefaultCategories']);
 // Reject any random requests
 Route::any('{any}', function () {
     return response()->json(
@@ -250,3 +249,5 @@ Route::any('{any}', function () {
         404
     );
 })->where('any', '.*');
+        // Get isOnbaording = 1 category without user log in
+        //Route::get('/defaults', [Api\V1\CategoryController::class, 'getDefaultCategories'])->withoutMiddleware(['auth:sanctum']);
