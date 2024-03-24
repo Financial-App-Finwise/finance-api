@@ -191,6 +191,21 @@ class MyFinanceController extends Controller
         // Add the user ID to the request data
         $request->merge(['userID' => $user->id]);
 
+        // Retrieve "Other" category ID
+        $category = Category::where('name', 'Other')->where('isIncome', 1)->first();
+
+        // Add Transaction
+        $transaction = new Transaction([
+            'userID' => $user->id,
+            'categoryID' => $category->id,
+            'isIncome' => 1,
+            'amount' => $request->totalbalance,
+            'hasContributed' => 0,
+            'date' => Carbon::now(),
+            'note' => "My Finance Initialization",
+        ]);
+        $transaction->save();
+
         // Create a new financial record using the request data and return JSON response
         return response()->json(['success' => 'true', 'data' => new MyFinanceResource(MyFinance::create($request->all()))]);
     }
